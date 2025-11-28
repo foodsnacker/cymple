@@ -1,0 +1,24 @@
+📝 Fibonacci with Parallel Evaluation
+📝 Demonstrates: Functions, recursion, quantum operations
+
+🧵 fib(n: 🔢) -> 🔢
+    ❓ n <= 1
+        ↩ n
+    ↩ fib(n - 1) + fib(n - 2)
+
+🧵 fib_parallel(n: 🔢) -> 🔢
+    ❓ n <= 1
+        ↩ n
+    
+    📝 Calculate two branches in parallel
+    🌀📦 results ← [
+        fib_parallel(n - 1),
+        fib_parallel(n - 2)
+    ]
+        ✅ done
+            ↩ done[1] + done[2]
+
+📝 Calculate and display results
+🔁 i in 1..15
+    result ← fib_parallel(i)
+    💬 "fib(" + i + ") = " + result

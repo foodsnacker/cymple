@@ -1,0 +1,58 @@
+📝 Simple Web Server with Pattern Matching
+📝 Demonstrates: Structs, pattern matching, error handling
+
+🧱 Request(method: 🔤, path: 🔤, body: 🔤)
+🧱 Response(status: 🔢, body: 🔤)
+
+🧵 handle_request(req: Request) -> Response
+    🔀 (req.method, req.path)
+        ➜ ("GET", "/")
+            ↩ Response(status: 200, body: "Welcome to Cymple Web Server!")
+        
+        ➜ ("GET", path) ❓ starts_with(path, "/api/")
+            ↩ api_handler(path)
+        
+        ➜ ("POST", "/submit")
+            📝 Process form submission
+            ↩ Response(status: 201, body: "Created")
+        
+        ➜ ("GET", "/health")
+            ↩ Response(status: 200, body: "OK")
+        
+        ➜ _
+            ↩ Response(status: 404, body: "Not Found")
+
+🧵 api_handler(path: 🔤) -> Response
+    🔀 path
+        ➜ "/api/status"
+            ↩ Response(status: 200, body: '{"status": "running"}')
+        
+        ➜ "/api/version"
+            ↩ Response(status: 200, body: '{"version": "1.2"}')
+        
+        ➜ _
+            ↩ Response(status: 404, body: '{"error": "Endpoint not found"}')
+
+🧵 server()
+    💬 "🚀 Server starting on port 8080..."
+    
+    🔁 true
+        📝 Accept incoming connection
+        req ← accept_connection()
+        
+        📝 Handle request with error handling
+        🧘 guru(e)
+            🔀 e.code
+                ➜ 500..599
+                    💬 "⚠️ Server error: " + e.message
+                    send_response(Response(status: 500, body: "Internal Server Error"))
+                ➜ _
+                    💬 "❌ Unexpected error: " + e.message
+        
+        📝 Process request
+        resp ← handle_request(req)
+        send_response(resp)
+        💬 req.method + " " + req.path + " → " + resp.status
+
+📝 Start the server
+server()
