@@ -4,7 +4,7 @@
 
 [![Version](https://img.shields.io/badge/version-1.2%20FINAL-blue)](https://github.com/yourusername/cymple)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
-[![Status](https://img.shields.io/badge/status-specification-orange)](https://cymple.org)
+[![Status](https://img.shields.io/badge/status-specification-orange)](https://cymple.dev)
 
 ---
 
@@ -294,7 +294,7 @@ The language specification is freely available for anyone to implement.
 
 ## Links
 
-- 🌐 [Website](https://cymple.org)
+- 🌐 [Website](https://cymple.dev)
 - 📖 [Full Specification](cymple_spec_1_2_FINAL.md)
 - 💬 [Discussions](https://github.com/yourusername/cymple/discussions)
 - 🐛 [Issues](https://github.com/yourusername/cymple/issues)
