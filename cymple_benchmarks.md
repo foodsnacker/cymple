@@ -223,8 +223,9 @@ result ← fib(35)
 | Mode | Time (ms) | Binary Size |
 |------|-----------|-------------|
 | **Cymple (interpreted)** | **5-10** | **N/A** |
-| **Cymple (compiled, dynamic)** | **<1** | **50-150 KB** |
+| **Cymple (compiled, dynamic)** | **<1** | **30-100 KB** |
 | **Cymple (compiled, static)** | **<1** | **300-600 KB** |
+| PureBasic | <1 | 20-80 KB |
 | Python (CPython) | 15-25 | N/A |
 | Python (PyPy) | 80-120 | N/A |
 | Rust (release) | <1 | 300 KB - 3 MB |
@@ -245,9 +246,10 @@ Cymple binaries are exceptionally small because:
 5. **Minimal dependencies** - Only glibc (universally available)
 
 **Comparison:**
-- 10× smaller than Go (50-150 KB vs 1.5-2 MB)
-- 3-6× smaller than Rust (50-150 KB vs 300 KB - 3 MB)
-- Nearly as small as C (16-50 KB)
+- Similar to PureBasic (30-100 KB vs 20-80 KB)
+- 15-20× smaller than Go (30-100 KB vs 1.5-2 MB)
+- 3-10× smaller than Rust (30-100 KB vs 300 KB - 3 MB)
+- Comparable to optimized C (16-50 KB)
 
 **Ideal for:**
 - Edge computing and IoT devices

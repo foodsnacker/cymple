@@ -77,12 +77,12 @@
 | Metric | Cymple | Rust | Go | Python | JavaScript |
 |--------|--------|------|----|---------| -----------|
 | **Startup Time** | Fast (interpreted) | Fast (compiled) | Very fast | Medium | Medium (V8) |
-| **Raw Speed** | Medium-High* | Very high | High | Low | Medium-High (JIT) |
-| **Memory Usage** | Low (RAII) | Very low | Low-Medium (GC) | High | Medium-High |
-| **Concurrency Overhead** | Low (tasks) | Very low | Very low | High (GIL) | Medium (event loop) |
-| **Binary Size (dynamic)** | 50-150 KB | 300 KB - 3 MB | 1.5-2 MB | N/A | N/A |
-| **Binary Size (static)** | 300-600 KB | 3-5 MB | 2 MB | N/A | N/A |
-| **Compilation Speed** | Fast | Slow | Very fast | N/A | N/A |
+| **Raw Speed** | Medium-High* | Very high | High | Low | Medium-High (JIT) | High |
+| **Memory Usage** | Low (RAII) | Very low | Low-Medium (GC) | High | Medium-High | Very low |
+| **Concurrency Overhead** | Low (tasks) | Very low | Very low | High (GIL) | Medium (event loop) | Very low |
+| **Binary Size (dynamic)** | 30-100 KB | 300 KB - 3 MB | 1.5-2 MB | N/A | N/A | 20-80 KB |
+| **Binary Size (static)** | 300-600 KB | 3-5 MB | 2 MB | N/A | N/A | N/A |
+| **Compilation Speed** | Fast | Slow | Very fast | N/A | N/A | Very fast |
 
 *Depends on implementation quality
 
