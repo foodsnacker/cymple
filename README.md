@@ -10,6 +10,8 @@
 
 ## Overview
 
+*DISCLAIMER*: This work is based on about 40 years of experience with 12 different programming languages. The definition and outcome however wouldn't be possible without ChatGPT (for interactive work on the language itself) and Claude (for fixing last errors and creating these pages). Please keep in mind, this is a RESEARCH language.
+
 Cymple is a research programming language that explores novel approaches to procedural programming through Unicode symbols, share-nothing concurrency, and deterministic memory management without garbage collection.
 
 **Key Features:**
