@@ -1,0 +1,339 @@
+CYMPLE EBNF Grammar - Version 1.3 (2025-12-02)
+================================================
+
+(* Lexical Structure *)
+
+program             = statement_list ;
+
+statement_list      = { statement } ;
+
+statement           = comment
+                    | constant_decl
+                    | variable_decl
+                    | assignment
+                    | function_def
+                    | struct_def
+                    | return_stmt
+                    | if_stmt
+                    | loop_stmt
+                    | match_stmt
+                    | output_stmt
+                    | input_stmt
+                    | borrow_stmt
+                    | channel_op
+                    | quantum_op
+                    | timer_event
+                    | error_handler
+                    | module_import
+                    | ffi_decl
+                    | color_cmd
+                    | function_call
+                    | break_stmt
+                    | continue_stmt
+                    ;
+
+(* Comments *)
+
+comment             = "📝" , [ text ] , NEWLINE
+                    | "📝" , INDENT , text_block , OUTDENT
+                    ;
+
+(* Variables and Constants *)
+
+constant_decl       = "📘" , identifier , "←" , expression ;
+
+variable_decl       = type_prefix , identifier , "←" , expression ;
+
+assignment          = type_prefix , identifier , "←" , expression
+                    | identifier , "←" , expression
+                    | identifier , "." , identifier , "←" , expression
+                    | identifier , "[" , expression , "]" , "←" , expression
+                    ;
+
+type_prefix         = "🔢" | "🔤" | "📋" | "🗺️" | "🔣" | handle_type ;
+
+handle_type         = "💾" | "🎵" | "🖼️" | custom_handle ;
+
+(* Functions *)
+
+function_def        = "🧵" , identifier , "(" , [ param_list ] , ")" , [ return_type ] , INDENT , statement_list , OUTDENT ;
+
+param_list          = param , { "," , param } ;
+
+param               = identifier , ":" , type_spec ;
+
+return_type         = "->" , type_spec
+                    | "->" , "(" , type_spec , { "," , type_spec } , ")"
+                    ;
+
+type_spec           = "🔢" | "🔤" | "📋" | "🗺️" | "🔣" | "✅" | "✗" | identifier | handle_type ;
+
+return_stmt         = "↩" , [ expression ] ;
+
+function_call       = identifier , "(" , [ arg_list ] , ")" ;
+
+arg_list            = expression , { "," , expression } ;
+
+(* Structs *)
+
+struct_def          = "🧱" , identifier , "(" , field_list , ")" ;
+
+field_list          = field_decl , { "," , field_decl } ;
+
+field_decl          = identifier , ":" , type_spec ;
+
+(* Control Flow *)
+
+if_stmt             = "❓" , condition , INDENT , statement_list , OUTDENT , [ else_stmt ] ;
+
+else_stmt           = "⤵️" , INDENT , statement_list , OUTDENT ;   (* new in 1.3 *)
+
+loop_stmt           = "🔁" , loop_condition , INDENT , statement_list , OUTDENT ;
+
+loop_condition      = expression
+                    | identifier , "in" , range_expr
+                    | identifier , "=" , range_expr        (* new in 1.3 - alternative syntax *)
+                    | identifier , "in" , expression
+                    | identifier , "=" , expression        (* new in 1.3 - alternative syntax *)
+                    ;
+
+range_expr          = expression , ".." , expression
+                    | expression , "..<" , expression
+                    | expression , ".." , expression , "⏩" , expression
+                    ;
+
+break_stmt          = "break" ;
+
+continue_stmt       = "continue" ;
+
+(* Pattern Matching *)
+
+match_stmt          = "🔀" , expression , INDENT , match_arms , OUTDENT ;
+
+match_arms          = match_arm , { match_arm } ;
+
+match_arm           = "➜" , pattern , [ guard ] , INDENT , statement_list , OUTDENT ;
+
+pattern             = literal
+                    | identifier
+                    | range_expr
+                    | "_"
+                    | struct_pattern
+                    | "(" , pattern , { "," , pattern } , ")"
+                    ;
+
+struct_pattern      = identifier , "(" , [ pattern , { "," , pattern } ] , ")" ;
+
+guard               = "❓" , condition ;
+
+(* Expressions *)
+
+expression          = logical_expr ;
+
+logical_expr        = comparison_expr , { ( "&&" | "||" ) , comparison_expr } ;
+
+comparison_expr     = bitwise_expr , [ ( "==" | "!=" | "<" | ">" | "<=" | ">=" ) , bitwise_expr ] ;
+
+bitwise_expr        = additive_expr , { ( "&" | "|" | "^" | "<<" | ">>" ) , additive_expr } ;
+
+additive_expr       = multiplicative_expr , { ( "+" | "-" ) , multiplicative_expr } ;
+
+multiplicative_expr = unary_expr , { ( "*" | "/" | "%" ) , unary_expr } ;
+
+unary_expr          = [ ( "!" | "-" ) ] , primary_expr ;
+
+primary_expr        = literal
+                    | identifier
+                    | type_prefix , identifier                (* variable reference with type *)
+                    | function_call
+                    | input_expr
+                    | "(" , expression , ")"
+                    | "[" , [ expression_list ] , "]"        (* list literal *)
+                    | "{" , [ map_entries ] , "}"            (* map literal *)
+                    | primary_expr , "." , identifier         (* property access *)
+                    | primary_expr , "[" , expression , "]"   (* indexing *)
+                    | "null"
+                    | "null_handle"
+                    ;
+
+expression_list     = expression , { "," , expression } ;
+
+map_entries         = map_entry , { "," , map_entry } ;
+
+map_entry           = string_literal , ":" , expression ;
+
+condition           = expression ;
+
+(* Literals *)
+
+literal             = number_literal
+                    | string_literal
+                    | bool_literal
+                    ;
+
+number_literal      = digit , { digit } , [ "." , digit , { digit } ]
+                    | "0x" , hex_digit , { hex_digit }
+                    ;
+
+string_literal      = '"' , { string_char | interpolation } , '"' ;   (* enhanced in 1.3 *)
+
+interpolation       = type_prefix , identifier ;                       (* new in 1.3 *)
+
+string_char         = ? any unicode character except '"' ?
+                    | escape_sequence
+                    ;
+
+escape_sequence     = "\\n" | "\\t" | "\\\"" | "\\\\" | "\\u{" , hex_digit , { hex_digit } , "}" ;
+
+bool_literal        = "✅" | "✗" ;
+
+(* I/O *)
+
+output_stmt         = "💬" , expression ;
+
+input_stmt          = type_prefix , identifier , "←" , input_expr ;
+
+input_expr          = "🔤🔽" , string_literal ;
+
+(* Borrowing *)
+
+borrow_stmt         = "🔗" , identifier , "->" , [ "mut" ] , identifier , INDENT , statement_list , OUTDENT ;
+
+(* Channels and Tasks *)
+
+channel_op          = channel_create
+                    | channel_send
+                    | channel_receive
+                    | task_spawn
+                    | task_cancel
+                    | channel_select
+                    ;
+
+channel_create      = "📡" , identifier , "←" , "🛰️" , "(" , "capacity:" , expression , ")" ;
+
+channel_send        = "🚀" , identifier , "," , expression ;
+
+channel_receive     = "🎯" , identifier , "→" , identifier ;
+
+task_spawn          = "spawn" , function_call , [ event_handlers ] ;
+
+task_cancel         = "🛑" , identifier ;
+
+channel_select      = "select" , INDENT , select_arms , OUTDENT ;
+
+select_arms         = select_arm , { select_arm } ;
+
+select_arm          = ( channel_send | channel_receive ) , INDENT , statement_list , OUTDENT ;
+
+event_handlers      = INDENT , event_handler , { event_handler } , OUTDENT ;
+
+event_handler       = event_symbol , identifier , INDENT , statement_list , OUTDENT ;
+
+event_symbol        = "✅" | "❌" | "⏩" | "⏹️" ;
+
+(* Quantum Operations *)
+
+quantum_op          = quantum_race | quantum_collect ;
+
+quantum_race        = "🌀⚡" , identifier , "←" , "[" , expression_list , "]" , [ event_handlers ] ;
+
+quantum_collect     = "🌀📦" , identifier , "←" , "[" , expression_list , "]" , [ event_handlers ] ;
+
+(* Timers *)
+
+timer_event         = oneshot_timer | periodic_timer ;
+
+oneshot_timer       = "⏱️▶" , duration , INDENT , statement_list , OUTDENT ;
+
+periodic_timer      = "⏱️🔁" , duration , INDENT , statement_list , OUTDENT ;
+
+duration            = number_literal , time_unit ;
+
+time_unit           = "ms" | "s" | "m" | "h" ;
+
+(* Error Handling *)
+
+error_handler       = "🧘" , identifier , "(" , identifier , ")" , INDENT , match_stmt , OUTDENT ;
+
+(* Modules *)
+
+module_import       = "🧩" , module_name , [ "as" , identifier ]
+                    | "🛠️" , plugin_name
+                    ;
+
+module_name         = emoji_identifier ;
+
+plugin_name         = identifier ;
+
+module_call         = "🧩" , module_name , "▶" , [ type_spec ] , "(" , [ arg_list ] , ")"
+                    | "🛠️" , plugin_name , "▶" , [ type_spec ] , "(" , [ arg_list ] , ")"
+                    ;
+
+(* FFI *)
+
+ffi_decl            = "🔗" , string_literal , INDENT , ffi_functions , OUTDENT ;
+
+ffi_functions       = ffi_function , { ffi_function } ;
+
+ffi_function        = "🧵" , identifier , "(" , [ ffi_param_list ] , ")" , [ "->" , ffi_type ] ;
+
+ffi_param_list      = ffi_param , { "," , ffi_param } ;
+
+ffi_param           = identifier , ":" , ffi_type ;
+
+ffi_type            = type_spec | pointer_type ;
+
+pointer_type        = "*" , type_spec ;
+
+(* Colors *)
+
+color_cmd           = "🎨:" , color_value ;
+
+color_value         = color_emoji
+                    | "rgba(" , expression , "," , expression , "," , expression , "," , expression , ")"
+                    | identifier , "[" , expression , "]"
+                    ;
+
+color_emoji         = "🔴" | "🟢" | "🔵" | "🟡" | "🟣" | "🟤" | "⚪" | "⚫"
+                    | "🟥" | "🟩" | "🟦" | "🟨" | "🟪" | "🟫" | "⬜" | "⬛"
+                    ;
+
+(* Identifiers and Terminals *)
+
+identifier          = letter , { letter | digit | "_" } ;
+
+emoji_identifier    = emoji , { emoji } ;
+
+letter              = "a" .. "z" | "A" .. "Z" ;
+
+digit               = "0" .. "9" ;
+
+hex_digit           = digit | "a" .. "f" | "A" .. "F" ;
+
+emoji               = ? any Unicode emoji character ? ;
+
+(* Whitespace and Structure *)
+
+INDENT              = ? increase indentation level by one TAB ? ;
+
+OUTDENT             = ? decrease indentation level by one TAB ? ;
+
+NEWLINE             = "\n" ;
+
+text                = { ? any character except NEWLINE ? } ;
+
+text_block          = { text , NEWLINE } ;
+
+(* Notes on Version 1.3 Changes *)
+
+(*
+1. String interpolation: string_literal now includes interpolation production
+2. Else symbol: else_stmt uses ⤵️ instead of ❌
+3. Property access: primary_expr includes .length and .size access
+4. Alternative range syntax: loop_condition includes '=' as alternative to 'in'
+5. Optional return type: function_def has optional return_type
+6. Comparison operator: Only '==' for equality (not '=')
+7. Logical vs bitwise: && || for logical, & | ^ for bitwise
+*)
+
+(* End of Grammar *)
