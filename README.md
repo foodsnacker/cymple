@@ -311,7 +311,7 @@ SOFTWARE.
 
 ## Contact & Community
 
-- **Website**: https://joerg-burbach.de/projekte/cymple
+- **Website (with some working examples)**: https://cymple.dev
 - **GitHub**: https://github.com/foodsnacker/cymple
 - **Author**: Jörg Burbach
 
