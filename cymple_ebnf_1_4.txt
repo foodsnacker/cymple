@@ -1,0 +1,525 @@
+CYMPLE EBNF Grammar - Version 1.4 (2025-12-04)
+================================================
+
+(* Lexical Structure *)
+
+program             = statement_list ;
+
+statement_list      = { statement } ;
+
+statement           = comment
+                    | constant_decl
+                    | variable_decl
+                    | assignment
+                    | function_def
+                    | struct_def
+                    | return_stmt
+                    | if_stmt
+                    | loop_stmt
+                    | match_stmt
+                    | output_stmt
+                    | input_stmt
+                    | borrow_stmt
+                    | channel_op
+                    | quantum_op
+                    | timer_event
+                    | error_handler
+                    | module_import
+                    | ffi_decl
+                    | color_cmd
+                    | function_call
+                    | break_stmt
+                    | continue_stmt
+                    | stop_stmt
+                    ;
+
+(* Comments *)
+
+comment             = "📝" , [ text ] , NEWLINE
+                    | "📝" , INDENT , text_block , OUTDENT
+                    ;
+
+(* Variables and Constants *)
+
+constant_decl       = "📘" , identifier , "←" , expression ;
+
+variable_decl       = type_prefix , identifier , "←" , expression ;
+
+assignment          = type_prefix , identifier , "←" , expression
+                    | identifier , "←" , expression
+                    | identifier , "." , identifier , "←" , expression
+                    | identifier , "[" , expression , "]" , "←" , expression
+                    ;
+
+type_prefix         = "🔢" | "🔤" | "📋" | "🗺️" | "🔣" | "🔘" | handle_type ;
+
+handle_type         = "💾" | "🎵" | "🖼️" | custom_handle ;
+
+(* Functions *)
+
+function_def        = "🧵" , identifier , "(" , [ param_list ] , ")" , [ return_type ] , INDENT , statement_list , OUTDENT ;
+
+param_list          = param , { "," , param } ;
+
+param               = identifier , ":" , type_spec ;
+
+return_type         = "->" , type_spec
+                    | "->" , "(" , type_spec , { "," , type_spec } , ")"
+                    ;
+
+type_spec           = "🔢" | "🔤" | "📋" | "🗺️" | "🔣" | "🔘" | "✅" | "✗" | identifier | handle_type ;
+
+return_stmt         = "↩" , [ expression ] ;
+
+function_call       = identifier , "(" , [ arg_list ] , ")" ;
+
+arg_list            = expression , { "," , expression } ;
+
+(* Structs *)
+
+struct_def          = "🧱" , identifier , "(" , field_list , ")" ;
+
+field_list          = field_decl , { "," , field_decl } ;
+
+field_decl          = identifier , ":" , type_spec ;
+
+(* Control Flow *)
+
+if_stmt             = "❓" , condition , INDENT , statement_list , OUTDENT , [ else_stmt ] ;
+
+else_stmt           = "⤵️" , INDENT , statement_list , OUTDENT ;
+
+loop_stmt           = "🔁" , loop_condition , INDENT , statement_list , OUTDENT ;
+
+loop_condition      = expression
+                    | identifier , "in" , range_expr
+                    | identifier , "=" , range_expr
+                    | identifier , "in" , expression
+                    | identifier , "=" , expression
+                    ;
+
+range_expr          = expression , ".." , expression
+                    | expression , "..<" , expression
+                    | expression , ".." , expression , "⏩" , expression
+                    ;
+
+break_stmt          = "break" ;
+
+continue_stmt       = "continue" ;
+
+stop_stmt           = "🛑" ;   (* new in 1.4 - explicit stop *)
+
+(* Pattern Matching *)
+
+match_stmt          = "🔀" , expression , INDENT , match_arms , OUTDENT ;
+
+match_arms          = match_arm , { match_arm } ;
+
+match_arm           = "➜" , pattern , [ guard ] , INDENT , statement_list , OUTDENT ;
+
+pattern             = literal
+                    | identifier
+                    | range_expr
+                    | "_"
+                    | struct_pattern
+                    | "(" , pattern , { "," , pattern } , ")"
+                    ;
+
+struct_pattern      = identifier , "(" , [ pattern , { "," , pattern } ] , ")" ;
+
+guard               = "❓" , condition ;
+
+(* Expressions *)
+
+expression          = logical_expr ;
+
+logical_expr        = comparison_expr , { ( "&&" | "||" ) , comparison_expr } ;
+
+comparison_expr     = bitwise_expr , [ ( "==" | "!=" | "<" | ">" | "<=" | ">=" ) , bitwise_expr ] ;
+
+bitwise_expr        = additive_expr , { ( "&" | "|" | "^" | "<<" | ">>" ) , additive_expr } ;
+
+additive_expr       = multiplicative_expr , { ( "+" | "-" ) , multiplicative_expr } ;
+
+multiplicative_expr = unary_expr , { ( "*" | "/" | "%" ) , unary_expr } ;
+
+unary_expr          = [ ( "!" | "-" ) ] , primary_expr ;
+
+primary_expr        = literal
+                    | identifier
+                    | type_prefix , identifier
+                    | function_call
+                    | input_expr
+                    | "(" , expression , ")"
+                    | "[" , [ expression_list ] , "]"
+                    | "{" , [ map_entries ] , "}"
+                    | primary_expr , "." , identifier
+                    | primary_expr , "[" , expression , "]"
+                    | "null"
+                    | "null_handle"
+                    ;
+
+expression_list     = expression , { "," , expression } ;
+
+map_entries         = map_entry , { "," , map_entry } ;
+
+map_entry           = string_literal , ":" , expression ;
+
+condition           = expression ;
+
+(* Literals *)
+
+literal             = number_literal
+                    | string_literal
+                    | bool_literal
+                    ;
+
+number_literal      = digit , { digit } , [ "." , digit , { digit } ]
+                    | "0x" , hex_digit , { hex_digit }
+                    | "0b" , binary_digit , { binary_digit }
+                    ;
+
+string_literal      = '"' , { string_char | interpolation } , '"' ;
+
+interpolation       = type_prefix , identifier ;
+
+string_char         = ? any unicode character except '"' ?
+                    | escape_sequence
+                    ;
+
+escape_sequence     = "\\n" | "\\t" | "\\\"" | "\\\\" | "\\u{" , hex_digit , { hex_digit } , "}" ;
+
+bool_literal        = "✅" | "✗" ;
+
+(* I/O *)
+
+output_stmt         = "💬" , expression ;
+
+input_stmt          = type_prefix , identifier , "←" , input_expr ;
+
+input_expr          = "🔤🔽" , string_literal ;
+
+(* Borrowing *)
+
+borrow_stmt         = "🔗" , identifier , "->" , [ "mut" ] , identifier , INDENT , statement_list , OUTDENT ;
+
+(* Channels *)
+
+channel_op          = channel_create
+                    | channel_send
+                    | channel_receive
+                    ;
+
+channel_create      = "📡" , identifier , "←" , "🛰️" , type_spec ;
+
+channel_send        = "🚀" , identifier , "," , expression ;
+
+channel_receive     = type_prefix , identifier , "←" , "🎯" , identifier ;
+
+(* Quantum Operations - Enhanced in v1.4 *)
+
+quantum_op          = quantum_race
+                    | quantum_collect
+                    ;
+
+quantum_race        = "🌀⚡" , type_prefix , identifier , "←" , "[" , task_list , "]" , INDENT , race_events , OUTDENT ;
+
+quantum_collect     = "🌀📦" , "📋" , identifier , "←" , "[" , task_list , "]" , INDENT , collect_events , OUTDENT ;
+
+task_list           = expression , { "," , expression } ;
+
+(* Race Events - Simplified in v1.4 *)
+
+race_events         = [ timeout_event ] , success_event , [ error_event ] ;
+
+success_event       = "✅" , identifier , INDENT , statement_list , OUTDENT ;
+
+error_event         = "❌" , identifier , INDENT , statement_list , OUTDENT ;
+
+(* Collect Events - Enhanced in v1.4 *)
+
+collect_events      = [ timeout_event ] , [ progress_event ] , success_event , [ total_failure_event ] ;
+
+progress_event      = "⏩" , "📋" , identifier , [ "every" , expression ] , INDENT , statement_list , OUTDENT ;
+
+total_failure_event = "❌" , identifier , INDENT , statement_list , OUTDENT ;   (* new in 1.4 *)
+
+(* Timeout - Enhanced in v1.4 *)
+
+timeout_event       = "⏱️" , timeout_value , INDENT , statement_list , OUTDENT ;
+
+timeout_value       = number_literal , [ time_unit ]   (* enhanced: optional unit *)
+                    | type_prefix , identifier         (* variable (always msec) *)
+                    ;
+
+time_unit           = "ms" | "s" | "m" | "h" ;   (* new in 1.4 *)
+
+(* Timers *)
+
+timer_event         = oneshot_timer
+                    | periodic_timer
+                    ;
+
+oneshot_timer       = "⏱️▶" , expression , "," , identifier ;
+
+periodic_timer      = "⏱️🔁" , expression , "," , identifier ;
+
+(* Error Handling *)
+
+error_handler       = "🧘" , identifier , "(" , identifier , ")" , INDENT , statement_list , OUTDENT ;
+
+(* Modules *)
+
+module_import       = internal_module
+                    | external_plugin
+                    ;
+
+internal_module     = "🧩" , string_literal ;
+
+external_plugin     = "🛠️" , string_literal ;
+
+(* FFI *)
+
+ffi_decl            = "🔗" , string_literal , INDENT , ffi_signatures , OUTDENT ;
+
+ffi_signatures      = ffi_signature , { ffi_signature } ;
+
+ffi_signature       = "🧵" , identifier , "(" , [ ffi_param_list ] , ")" , [ "->" , ffi_type ] ;
+
+ffi_param_list      = ffi_param , { "," , ffi_param } ;
+
+ffi_param           = identifier , ":" , ffi_type ;
+
+ffi_type            = type_spec
+                    | "*" , type_spec   (* pointer type *)
+                    ;
+
+(* Colors *)
+
+color_cmd           = "🎨:" , color_value ;
+
+color_value         = color_emoji
+                    | "rgba(" , number_literal , "," , number_literal , "," , number_literal , "," , number_literal , ")"
+                    | identifier
+                    ;
+
+color_emoji         = "🔴" | "🟠" | "🟡" | "🟢" | "🔵" | "🟣" | "⚫" | "⚪"
+                    | "🟥" | "🟧" | "🟨" | "🟩" | "🟦" | "🟪" | "⬛" | "⬜"
+                    ;
+
+(* Lexical Elements *)
+
+identifier          = letter , { letter | digit | "_" } ;
+
+digit               = "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" ;
+
+hex_digit           = digit | "a" | "b" | "c" | "d" | "e" | "f" | "A" | "B" | "C" | "D" | "E" | "F" ;
+
+binary_digit        = "0" | "1" ;
+
+letter              = ? unicode letter per UAX-31 ? ;
+
+text                = ? any unicode text ? ;
+
+text_block          = { text , NEWLINE } ;
+
+(* Structural Elements *)
+
+INDENT              = ? increase indentation by one TAB ? ;
+
+OUTDENT             = ? decrease indentation by one TAB ? ;
+
+NEWLINE             = ? line break (normalized to \n) ? ;
+
+================================================
+SEMANTIC NOTES - Version 1.4
+================================================
+
+1. QUANTUM OPERATIONS SEMANTICS
+
+Race (🌀⚡):
+- Starts all tasks in parallel
+- Returns first successful result
+- Automatically sends 🛑 to remaining tasks
+- Deterministic: Lowest index wins on simultaneous completion
+- Without timeout handler: Throws ❌ "Timeout" automatically
+- No progress events (removed in v1.4)
+
+Collect (🌀📦):
+- Starts all tasks in parallel
+- ✅ fires when at least one task succeeds
+- Failed tasks included in results (use filter_ok/filter_error)
+- 🛑 in ⏩ block stops all running tasks
+- ❌ total_failure only fires if ALL tasks fail
+- Without timeout handler: Returns partial results
+
+2. TIMEOUT BEHAVIOR (Enhanced v1.4)
+
+Time Units:
+- ms  = milliseconds
+- s   = seconds
+- m   = minutes
+- h   = hours
+- none = milliseconds (default)
+
+Variables:
+- Always interpreted as milliseconds
+- Example: 🔢t ← 3000 means 3000ms
+
+Conversion:
+- 1s  = 1000ms
+- 1m  = 60000ms
+- 1h  = 3600000ms
+
+3. PROGRESS FREQUENCY (New v1.4)
+
+Syntax: ⏩ 📋partial every N
+
+- N = literal number: Fire every N completed tasks
+- N = variable: Fire every variable number of tasks
+- No "every": Fire after each task (v1.3 behavior)
+
+Performance:
+- Large N reduces event overhead
+- Recommended for >100 tasks: every 10 or higher
+
+4. STOP SIGNAL (🛑) - Unified v1.4
+
+Quantum Operations:
+- In ⏩ block: Stops all running tasks
+- Keeps completed results
+- Returns immediately
+
+Channels:
+- Closes channel
+- Signals to receiver
+
+Loops:
+- Breaks out of loop
+- Equivalent to "break"
+
+Tasks:
+- Checks ❓ 🛑 to detect cancellation
+- Allows graceful shutdown
+
+5. ERROR HANDLING
+
+Manual Filtering:
+- filter_ok(📋results) → successful tasks
+- filter_error(📋results) → failed tasks
+
+Result Properties:
+- result.is_ok → boolean
+- result.value → success value
+- result.error → error value
+
+Total Failure:
+- Only fires if results.length == 0
+- All tasks must fail completely
+- Use for fallback logic
+
+6. OPERATOR PRECEDENCE
+
+Highest to Lowest:
+1. Primary (., [], (), function calls)
+2. Unary (!, -)
+3. Multiplicative (*, /, %)
+4. Additive (+, -)
+5. Bitwise shifts (<<, >>)
+6. Bitwise (&, |, ^)
+7. Comparison (==, !=, <, >, <=, >=)
+8. Logical (&&, ||)
+9. Assignment (←)
+
+7. TYPE SYSTEM
+
+All types nullable:
+- Use "null" for checking
+- Handles: "null_handle"
+
+Move semantics:
+- Collections: 📋, 🗺️, 🔣
+- Handles: 💾, 🎵, 🖼️, etc.
+- After move: original = null/null_handle
+
+Borrowing:
+- Block-scoped only
+- Cannot return borrowed values
+- Cannot send via channels
+
+8. SCOPING RULES
+
+Global:
+- Top-level constants (📘)
+- Top-level functions (🧵)
+
+Function:
+- Parameters
+- Local variables
+- Local constants
+
+Block:
+- Loop variables
+- If/else variables
+- Borrow aliases
+
+9. ENCODING & NORMALIZATION
+
+- UTF-8 encoding required
+- NFC normalization before tokenization
+- TAB (U+0009) for indentation only
+- Line endings normalized to \n
+
+10. RESERVED SYMBOLS (v1.4)
+
+Cannot be redefined:
+- All emoji type prefixes (🔢, 🔤, etc.)
+- Control flow (❓, ⤵️, 🔁, 🔀, ➜)
+- Operators (←, ↩, 🛑)
+- Quantum (🌀⚡, 🌀📦)
+- Events (✅, ❌, ⏩, ⏱️)
+- Channels (📡, 🛰️, 🚀, 🎯)
+- Special (🧘, 🔗, 🗑️, 📝, 📘)
+
+================================================
+EXAMPLE DERIVATIONS - Version 1.4
+================================================
+
+Example 1: Quantum Race with Timeout (v1.4)
+--------------------------------------------
+quantum_race
+→ "🌀⚡" type_prefix identifier "←" "[" task_list "]" INDENT race_events OUTDENT
+→ "🌀⚡" "🔤" "result" "←" "[" expression "," expression "]" INDENT timeout_event success_event OUTDENT
+→ "🌀⚡" "🔤" "result" "←" "[" function_call "," function_call "]" INDENT "⏱️" timeout_value INDENT statement_list OUTDENT "✅" identifier INDENT statement_list OUTDENT OUTDENT
+→ "🌀⚡ 🔤result ← [fetch_eu(), fetch_us()]
+      ⏱️ 3s
+          💬 \"Timeout\"
+      ✅ 🔤winner
+          ↩ 🔤winner"
+
+Example 2: Quantum Collect with Progress (v1.4)
+------------------------------------------------
+quantum_collect
+→ "🌀📦" "📋" identifier "←" "[" task_list "]" INDENT collect_events OUTDENT
+→ "🌀📦" "📋" "results" "←" "[" expression "," expression "]" INDENT progress_event success_event OUTDENT
+→ "🌀📦" "📋" "results" "←" "[" function_call "," function_call "]" INDENT "⏩" "📋" identifier "every" expression INDENT statement_list OUTDENT "✅" "📋" identifier INDENT statement_list OUTDENT OUTDENT
+→ "🌀📦 📋results ← [task1(), task2()]
+      ⏩ 📋partial every 10
+          💬 \"Progress\"
+          ❓ condition
+              🛑
+      ✅ 📋all
+          ↩ 📋all"
+
+Example 3: Total Failure Event (New v1.4)
+------------------------------------------
+total_failure_event
+→ "❌" identifier INDENT statement_list OUTDENT
+→ "❌" "🔤" "total_failure" INDENT output_stmt return_stmt OUTDENT
+→ "❌ 🔤total_failure
+      💬 \"All failed\"
+      ↩ false"
+
+================================================
+End of EBNF Grammar - Cymple 1.4
+================================================

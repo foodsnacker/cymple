@@ -1,334 +1,559 @@
-# CYMPLE Language Package v1.3
+# CYMPLE Programming Language
 
-**Procedural Programming with Unicode Symbols**
-
----
-
-## What's in This Package?
-
-This is the complete language specification package for **Cymple Version 1.3** (Released December 2, 2025).
-
-### 📄 Files Included
-
-1. **cymple_spec_1_3.md** - Complete language specification (40+ pages)
-2. **cymple_ebnf_1_3.txt** - Formal EBNF grammar definition
-3. **CYMPLE_1_3_CHANGELOG.md** - Detailed changelog with migration guide
-4. **README.md** - This file
+**Version 1.4** - Procedural Programming with Unicode Symbols
 
 ---
 
 ## What is Cymple?
 
-Cymple is a modern procedural programming language that uses Unicode emoji symbols instead of traditional keywords. It's designed for:
+Cymple is a procedural programming language that uses Unicode symbols (emojis) instead of keywords. It combines modern safety features with classical simplicity, making concurrent programming accessible without sacrificing performance or correctness.
 
-- **Safety**: Move semantics, ownership, RAII - no garbage collection
-- **Clarity**: Visual symbols make code structure immediately apparent
-- **Concurrency**: Share-nothing tasks with channels
-- **Performance**: Deterministic cleanup, no GC pauses
-- **Simplicity**: Procedural design, no classes or OOP
+```cymple
+🧵 fibonacci(n: 🔢) -> 🔢
+    ❓ n <= 1
+        ↩ n
+    
+    🌀📦 📋results ← [fibonacci(n - 1), fibonacci(n - 2)]
+        ✅ 📋done
+            ↩ 📋done[1] + 📋done[2]
 
----
-
-## What's New in Version 1.3?
-
-### 🆕 Major Features
-
-1. **String Interpolation** - Embed variables directly: `"Value: 🔢x"`
-2. **Else Symbol ⤵️** - Dedicated symbol for else blocks
-3. **Property Access** - Clean syntax: `📋list.length` instead of `length(list)`
-4. **Alternative Loop Syntax** - Use `i = 1..10` or `i in 1..10`
-5. **Optional Return Types** - Void functions don't need return declaration
-
-### ⚠️ Breaking Changes
-
-- Use `==` for comparison (not `=`)
-- Use `&&` and `||` for logical operations
-- Bitwise operators are `&`, `|`, `^`
-
-See **CYMPLE_1_3_CHANGELOG.md** for detailed migration guide.
+💬 "Fibonacci(10) = fibonacci(10)"
+```
 
 ---
 
-## Quick Start Examples
+## Key Features
 
-### Hello World with String Interpolation
+### 🎨 **Visual & Accessible**
+- Unicode symbols replace keywords
+- Clear indentation-based structure
+- No English keywords = internationally neutral
+- Type prefixes make variables instantly recognizable
+
+### 🔒 **Memory Safe**
+- Exclusive ownership and move semantics
+- RAII for deterministic resource management
+- No garbage collection pauses
+- No data races by design
+
+### ⚡ **Powerful Concurrency**
+- Share-nothing task model
+- Channels for safe communication
+- **Quantum Operations** for easy parallel programming
+- Preemptive multitasking
+
+### 🚀 **Simple Yet Powerful**
+- Procedural, no OOP complexity
+- No anonymous functions or closures
+- Pattern matching with guards
+- FFI for C library integration
+
+---
+
+## What's New in Version 1.4
+
+### ⏱️ **Timeouts with Units**
+```cymple
+🌀⚡ 🔤result ← [fetch_eu(), fetch_us()]
+    ⏱️ 3s  📝 Clear and readable!
+        💬 "Timeout"
+```
+
+### ⏩ **Progress Frequency Control**
+```cymple
+🌀📦 📋results ← [100 tasks...]
+    ⏩ 📋partial every 10  📝 50-90% less overhead
+        💬 "Progress: 📋partial.length%"
+```
+
+### 🛑 **Early Cancellation**
+```cymple
+⏩ 📋partial
+    ❓ 📋partial.length >= 20
+        🛑  📝 Stop when you have enough!
+        ↩ 📋partial
+```
+
+### ❌ **Total Failure Detection**
+```cymple
+❌ 🔤total_failure  📝 Only fires if ALL tasks fail
+    💬 "Everything failed"
+    ↩ fallback()
+```
+
+[See full changelog](cymple_1_4_changelog.md)
+
+---
+
+## Quick Start
+
+### Hello World
 ```cymple
 🔤name ← "World"
 💬 "Hello, 🔤name!"
 ```
 
-### FizzBuzz (1.3 Style)
+### Variables & Types
 ```cymple
-🔁 i = 1..100
-    ❓ i % 15 == 0
-        💬 "FizzBuzz"
-    ⤵️
-        ❓ i % 3 == 0
-            💬 "Fizz"
-        ⤵️
-            ❓ i % 5 == 0
-                💬 "Buzz"
-            ⤵️
-                💬 "🔢i"
+🔢count ← 42          📝 Number
+🔤text ← "Hello"      📝 String
+✅ is_valid ← ✅       📝 Bool (true)
+📋list ← [1, 2, 3]    📝 List
+🗺️map ← {"a": 1}      📝 Map
 ```
 
-### Function with Property Access
+### Control Flow
 ```cymple
-🧵 analyze_list(items: 📋)
-    💬 "List has 🔢items.length elements"
-    
-    🔢sum ← 0
-    🔁 item in items
-        🔢sum ← 🔢sum + item
-    
-    🔢avg ← 🔢sum / 🔢items.length
-    💬 "Average: 🔢avg"
+❓ age >= 18
+    💬 "Adult"
+⤵️
+    💬 "Minor"
+
+🔁 i in 1..10
+    💬 "Number: 🔢i"
+```
+
+### Functions
+```cymple
+🧵 add(a: 🔢, b: 🔢) -> 🔢
+    ↩ a + b
+
+🧵 greet(name: 🔤)  📝 No return type needed
+    💬 "Hello, 🔤name!"
+```
+
+### Parallel Computing
+```cymple
+📝 Race - First result wins
+🌀⚡ 🔤fastest ← [fetch_eu(), fetch_us(), fetch_asia()]
+    ⏱️ 3s
+        ↩ cached_value()
+    ✅ 🔤winner
+        ↩ 🔤winner
+
+📝 Collect - Gather all results
+🌀📦 📋results ← [process1(), process2(), process3()]
+    ⏩ 📋partial every 5
+        💬 "Progress: 📋partial.length"
+    ✅ 📋all
+        ↩ filter_ok(📋all)
 ```
 
 ---
 
-## Symbol Quick Reference
+## Why Cymple?
 
-### Core Language
-- `←` Assignment
-- `↩` Return
-- `❓` If/Conditional
-- `⤵️` Else (new in 1.3!)
-- `🔁` Loop
-- `📝` Comment
+### Comparison with Other Languages
 
-### Data Types
-- `🔢` Number
-- `🔤` String
-- `📋` List
-- `🗺️` Map
-- `✅` True
-- `✗` False
+**Cymple vs JavaScript:**
+```javascript
+// JavaScript (40+ lines)
+async function searchAll(query) {
+    const searches = [
+        searchGoogle(query),
+        searchBing(query),
+        searchDuck(query)
+    ];
+    
+    const timeout = new Promise((_, reject) =>
+        setTimeout(() => reject('Timeout'), 5000)
+    );
+    
+    try {
+        const results = await Promise.race([
+            Promise.allSettled(searches),
+            timeout
+        ]);
+        
+        return results
+            .filter(r => r.status === 'fulfilled')
+            .map(r => r.value);
+    } catch (error) {
+        return [];
+    }
+}
+```
 
-### Functions & Tasks
-- `🧵` Function/Task
-- `📡` Channel
-- `🛰️` Create Channel
-- `🚀` Send
-- `🎯` Receive
+**Cymple (15 lines):**
+```cymple
+🧵 search_all(🔤query) -> 📋
+    🌀📦 📋results ← [
+        search_google(🔤query),
+        search_bing(🔤query),
+        search_duck(🔤query)
+    ]
+        ⏱️ 5s
+            ↩ 📋results
+        ⏩ 📋partial
+            ❓ 📋partial.length >= 20
+                🛑
+                ↩ 📋partial
+        ✅ 📋all
+            ↩ filter_ok(📋all)
+```
 
-### I/O
-- `💬` Print/Output
-- `🔤🔽` Input (prompt)
-
-See **cymple_spec_1_3.md** for complete symbol reference.
-
----
-
-## Documentation Structure
-
-### cymple_spec_1_3.md
-
-Complete language specification with:
-- Overview and design principles
-- Full syntax and semantics
-- Type system details
-- Control flow structures
-- Concurrency model
-- Error handling
-- FFI (Foreign Function Interface)
-- Complete examples
-- Design rationale
-
-**Start here** if you're new to Cymple or implementing the language.
-
-### cymple_ebnf_1_3.txt
-
-Formal grammar definition in Extended Backus-Naur Form (EBNF).
-
-**Use this** for:
-- Parser implementation
-- Syntax validation
-- Tool development
-- IDE integration
-
-### CYMPLE_1_3_CHANGELOG.md
-
-Detailed changelog with:
-- New features explained with examples
-- Breaking changes highlighted
-- Migration guide from v1.2
-- Before/after code comparisons
-- Backward compatibility notes
-
-**Use this** if upgrading from v1.2 or tracking language evolution.
+**3-4x shorter, clearer intent, better control!**
 
 ---
 
-## Language Characteristics
+## Core Concepts
 
-### ✅ What Cymple IS
+### Memory Safety Without GC
 
-- Procedural programming language
-- Unicode symbols for keywords
-- Move semantics & ownership
-- No garbage collection (RAII)
-- Share-nothing concurrency
-- Both interpreted and compiled
-- Strongly typed with explicit prefixes
+```cymple
+📝 Handles use RAII - cleanup at block end
+💾file ← open("data.txt")
+🔗 file -> F
+    📋data ← F.read()
+    💬 "Read: 📋data.length bytes"
+📝 file automatically closed here
+```
 
-### ❌ What Cymple IS NOT
+### Move Semantics
 
-- Object-oriented (no classes)
-- Functional (no first-class functions)
-- Dynamically typed
-- Garbage collected
-- Shared-memory concurrent
+```cymple
+📋list1 ← [1, 2, 3]
+📋list2 ← list1  📝 list1 is now null (moved)
+```
+
+### Borrowing
+
+```cymple
+📋list ← [1, 2, 3]
+🔗 list -> L  📝 Read-only borrow
+    💬 L[1]
+
+🔗 list -> mut L  📝 Mutable borrow
+    L[1] ← 99
+    L.push(4)
+```
+
+### Pattern Matching
+
+```cymple
+🔀 value
+    ➜ 0
+        💬 "Zero"
+    ➜ 1..10
+        💬 "Small"
+    ➜ x ❓ x > 100
+        💬 "Large: 🔢x"
+    ➜ _
+        💬 "Other"
+```
+
+### Channels
+
+```cymple
+📡ch ← 🛰️🔢  📝 Create number channel
+
+🧵 sender(📡out)
+    🔁 i in 1..10
+        🚀 out, i
+
+🧵 receiver(📡in)
+    🔁 msg in in
+        💬 "Received: 🔢msg"
+```
 
 ---
 
-## Implementation Status
+## Quantum Operations (v1.4)
 
-**Version 1.3 is a SPECIFICATION only.**
+Cymple's killer feature for parallel programming.
 
-This package contains:
-- ✅ Complete language specification
-- ✅ Formal grammar (EBNF)
-- ✅ Syntax rules and semantics
-- ✅ Example programs
+### Race - First Wins
 
-This package does NOT contain:
-- ❌ Compiler implementation
-- ❌ Interpreter implementation
-- ❌ Standard library
-- ❌ IDE tools
+```cymple
+🌀⚡ 🔤result ← [task1(), task2(), task3()]
+    ⏱️ 5s
+        💬 "Timeout"
+        ↩ fallback()
+    ✅ 🔤winner
+        ↩ 🔤winner
+    ❌ 🔤error
+        🧘 🔤error
+            ↩ default()
+```
 
-### For Implementers
+**Use cases:**
+- Multi-region API calls
+- Fallback strategies
+- Latency optimization
 
-If you're interested in implementing Cymple:
+### Collect - Gather All
 
-1. Read **cymple_spec_1_3.md** thoroughly
-2. Study the **cymple_ebnf_1_3.txt** grammar
-3. Review example programs in the spec
-4. Consider starting with an interpreter (simpler than compiler)
-5. Focus on core features first (variables, functions, control flow)
-6. Add concurrency features later
+```cymple
+🌀📦 📋results ← [task1(), task2(), task3()]
+    ⏱️ 30s
+        ↩ 📋results  📝 Partial results
+    
+    ⏩ 📋partial every 10
+        🔢percent ← (📋partial.length * 100) / 🔢total
+        💬 "Progress: 🔢percent%"
+        
+        📝 Early cancellation
+        ❓ 📋partial.length >= 50
+            🛑
+            ↩ 📋partial
+    
+    ✅ 📋all
+        📋ok ← filter_ok(📋all)
+        ↩ 📋ok
+    
+    ❌ 🔤total_failure
+        💬 "All failed"
+        ↩ []
+```
 
-The specification is designed to be implementation-agnostic - you can target any platform.
+**Use cases:**
+- Batch processing
+- MapReduce operations
+- Parallel downloads
+- Data aggregation
+
+---
+
+## Documentation
+
+- [**Specification**](cymple_spec_1_4.md) - Complete language reference
+- [**EBNF Grammar**](cymple_ebnf_1_4.txt) - Formal syntax definition
+- [**Changelog**](cymple_1_4_changelog.md) - What's new in 1.4
+- [**Version Comparison**](cymple_version_comparison.md) - 1.2 vs 1.3 vs 1.4
 
 ---
 
 ## Design Philosophy
 
-### Why Unicode Symbols?
+### Simplicity Over Abstraction
 
-- **Visual clarity**: `🔢` instantly indicates a number
-- **International**: No English keywords to learn
-- **Compact**: Less typing than `let`, `function`, etc.
-- **Distinctive**: Code structure is immediately visible
+- No generics
+- No anonymous functions
+- No classes or OOP
+- Top-level functions only
 
-### Why No Garbage Collection?
+**Why?** Predictable behavior, easy to learn, fast compilation.
 
-- **Deterministic**: Know exactly when cleanup happens
-- **Predictable**: No GC pauses
-- **Real-time ready**: Suitable for embedded systems
-- **Lower latency**: Better performance characteristics
+### Safety Without Runtime Cost
 
-### Why Move Semantics?
+- Compile-time ownership checking
+- No garbage collection
+- RAII for deterministic cleanup
+- Share-nothing concurrency
 
-- **Safety**: Prevents data races by design
-- **Clear ownership**: Always know who owns what
-- **No hidden copies**: Performance is explicit
-- **Compiler enforced**: Catches errors at compile time
+**Why?** Real-time performance, embedded systems, low latency.
 
-### Why Share-Nothing Concurrency?
+### Readability Through Symbols
 
-- **No data races**: Impossible by design
-- **No locks needed**: Tasks communicate via channels
-- **Simpler reasoning**: Clear message-passing model
-- **Scales well**: Each task is independent
+- Visual distinction (🔢 vs `number`)
+- Less verbose
+- Language-neutral (no English)
+- Accessible internationally
+
+**Why?** Universal understanding, reduced cognitive load.
 
 ---
 
-## Comparison to Other Languages
+## Symbol Reference
 
-| Feature | Cymple | Rust | Go | Python |
-|---------|--------|------|----|----|
-| GC | No (RAII) | No | Yes | Yes |
-| Ownership | Yes | Yes | No | No |
-| Concurrency | Channels | Async/Threads | Goroutines | Threads |
-| Type System | Explicit Emoji | Inferred | Inferred | Dynamic |
-| OOP | No | Traits | Interfaces | Classes |
-| Binary Size | Tiny | Medium | Large | N/A |
+### Basic
+- `←` Assignment
+- `↩` Return
+- `❓` If
+- `⤵️` Else
+- `🔁` Loop
+- `📝` Comment
 
-### When to Use Cymple
+### Types
+- `🔢` Number
+- `🔤` String
+- `✅` / `✗` Bool
+- `📋` List
+- `🗺️` Map
+- `🔣` Bytearray
 
-✅ **Good for:**
-- Real-time systems
+### Concurrency
+- `🧵` Function/Task
+- `📡` Channel
+- `🛰️` Create channel
+- `🚀` Send
+- `🎯` Receive
+- `🛑` Stop
+- `🌀⚡` Race
+- `🌀📦` Collect
+
+### Events
+- `✅` Success
+- `❌` Error
+- `⏩` Progress
+- `⏱️` Timeout
+
+[See full symbol reference in specification](cymple_spec_1_4.md#symbol-reference)
+
+---
+
+## Examples
+
+### Multi-Server Search
+```cymple
+🧵 fetch_best(🔤query) -> 🔤
+    🌀⚡ 🔤result ← [
+        search_server_eu(🔤query),
+        search_server_us(🔤query),
+        search_server_asia(🔤query)
+    ]
+        ⏱️ 3s
+            ↩ cached_search(🔤query)
+        ✅ 🔤fastest
+            ↩ 🔤fastest
+```
+
+### Parallel Image Processing
+```cymple
+🧵 process_images(📋files) -> 📋
+    🌀📦 📋results ← split_and_process(📋files)
+        ⏱️ 5m
+            💬 "Timeout - 📋results.length done"
+            ↩ 📋results
+        
+        ⏩ 📋partial every 10
+            🔢percent ← (📋partial.length * 100) / 📋files.length
+            🖼️update_progress(🔢percent)
+        
+        ✅ 📋all
+            ↩ filter_ok(📋all)
+```
+
+### Error Handling with Guru
+```cymple
+🧵 process_file(🔤path)
+    🧘 guru(e)
+        🔀 e.code
+            ➜ 404
+                💬 "⚠️ File not found: 🔤path"
+                ↩
+            ➜ 403
+                ❌ Unauthorized() -> 403
+            ➜ _
+                💀 e
+    
+    💾f ← open(🔤path)
+    🔗 f -> F
+        📋data ← F.read()
+        💬 "Processed: 🔢data.length bytes"
+```
+
+---
+
+## Performance
+
+### Cymple vs Other Languages
+
+| Metric | Cymple | JavaScript | Rust | Go | Python |
+|--------|--------|------------|------|-----|---------|
+| **Lines of code** | **15** | 40+ | 35+ | 60+ | 30+ |
+| **Progress events** | ✅ Built-in | ❌ Manual | ❌ Manual | ⚠️ Complex | ❌ Manual |
+| **Early cancel** | ✅ Trivial | ❌ Complex | ⚠️ Complex | ⚠️ Very complex | ⚠️ Complex |
+| **Timeout** | ✅ `⏱️ 5s` | ⚠️ Wrapper | ✅ Built-in | ✅ Built-in | ✅ Built-in |
+| **Memory safety** | ✅ Compile-time | ❌ Runtime | ✅ Compile-time | ⚠️ Runtime | ❌ Runtime |
+| **GC pauses** | ✅ None | ❌ Yes | ✅ None | ❌ Yes | ❌ Yes |
+
+[See detailed benchmarks in changelog](cymple_1_4_changelog.md#performance-impact)
+
+---
+
+## Platform Support
+
+### Target Platforms
+- Linux (primary)
+- macOS
+- Windows
 - Embedded systems
-- Systems with strict memory constraints
-- Applications requiring predictable performance
-- Learning programming (visual symbols)
-- Internationalization (no English keywords)
+- WebAssembly (planned)
 
-❌ **Not ideal for:**
-- Large OOP codebases
-- Rapid prototyping (currently no implementation)
-- Projects requiring mature ecosystem
-- Teams unfamiliar with move semantics
+### Compilation
+- Interpreted mode for development
+- Compiled mode for production
+- Identical semantics in both modes
+- Small binaries (30-100 KB)
 
 ---
 
-## Version History
+## Getting Started
 
-- **v1.3** (2025-12-02) - String interpolation, else symbol, property access
-- **v1.2 FINAL** (2025-11-28) - Complete specification, production-ready
-- **v1.1** - Earlier development version
-- **v1.0** - Initial specification
+### Installation
+
+*Coming soon - compiler under development*
+
+### Learning Resources
+
+1. Read the [Quick Start](#quick-start) section above
+2. Study the [Complete Specification](cymple_spec_1_4.md)
+3. Review [Example Code](#examples)
+4. Check the [Changelog](cymple_1_4_changelog.md) for latest features
+
+---
+
+## Project Status
+
+**Version:** 1.4 (December 4, 2025)
+**Status:** Language specification complete, compiler in development
+
+### Completed
+✅ Language specification v1.4
+✅ EBNF grammar
+✅ Core features defined
+✅ Quantum operations enhanced
+✅ Documentation complete
+
+### In Progress
+🔄 Reference compiler implementation
+🔄 Standard library
+🔄 Tooling (formatter, linter)
+
+### Planned
+📋 IDE support (VS Code, etc.)
+📋 Package manager
+📋 Testing framework
+📋 WebAssembly target
+
+---
+
+## Contributing
+
+Cymple is currently in specification phase. Feedback welcome!
+
+- **Language Design:** Suggest improvements
+- **Examples:** Share use cases
+- **Documentation:** Report unclear sections
+- **Implementation:** Join compiler development (coming soon)
 
 ---
 
 ## License
 
-MIT License
-
-Copyright (c) 2025 Jörg Burbach
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+*License to be determined*
 
 ---
 
-## Contact & Community
+## Contact
 
-- **Website (with some working examples)**: https://cymple.dev
-- **GitHub**: https://github.com/foodsnacker/cymple
-- **Author**: Jörg Burbach
+**Author:** Jörg Burbach
+**Project:** https://github.com/foodsnacker/cymple
+**Website:** https://cymple.dev (planned)
 
 ---
 
 ## Acknowledgments
 
-This language specification was developed with assistance from:
-- **ChatGPT** (OpenAI) - Interactive language design and iteration
-- **Claude** (Anthropic) - Documentation, debugging, and refinement
+Cymple draws inspiration from:
+- **Rust** - Ownership and borrowing
+- **Go** - Simplicity and channels
+- **Erlang** - Share-nothing concurrency
+- **QOI** - Simplicity-first design philosophy
 
 ---
 
-**Thank you for your interest in Cymple!**
+**Cymple 1.4** - Making parallel programming simple again.
 
-We hope this specification inspires implementations and contributes to the evolution of programming language design.
-
----
-
-*Cymple v1.3 - December 2, 2025*
+*© 2025 Jörg Burbach*
