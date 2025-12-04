@@ -20,7 +20,38 @@ Version 1.4 focuses on making parallel programming more practical and powerful. 
 
 ## New Features
 
-### 1. ⏱️ Timeout with Time Units
+### 1. 🚀 Automatic main() Execution
+
+Programs can now define a standard entry point function.
+
+**New feature (v1.4):**
+```cymple
+🧵 initialize() -> 🔢
+    💬 "Initializing..."
+    ↩ 42
+
+🧵 main()
+    💬 "=== Program Start ==="
+    🔢config ← initialize()
+    💬 "Config loaded: 🔢config"
+    💬 "=== Program End ==="
+```
+
+**How it works:**
+- If a function named `main()` exists, it runs automatically
+- Executes after all top-level code
+- Provides consistent entry point like C, Go, Java, Rust
+- Optional - programs without `main()` work as before
+
+**Benefits:**
+- Standard entry point for larger programs
+- Cleaner structure for applications
+- Familiar pattern from other languages
+- Better organization of initialization code
+
+---
+
+### 2. ⏱️ Timeout with Time Units
 
 Timeouts now support human-readable time units instead of just milliseconds.
 
@@ -568,6 +599,7 @@ The `🛑` symbol now works consistently across all features.
 
 | Feature | v1.3 | v1.4 | Impact |
 |---------|------|------|--------|
+| **Automatic main()** | ❌ | ✅ | Better structure |
 | **Timeout units** | Only numbers | `ms`, `s`, `m`, `h` | Better readability |
 | **Progress frequency** | Every task | `every N` | 50-90% less overhead |
 | **Early cancellation** | ❌ Not possible | ✅ `🛑` in `⏩` | Faster, more efficient |

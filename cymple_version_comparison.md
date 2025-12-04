@@ -20,6 +20,7 @@ Comparing Cymple versions 1.2, 1.3, and 1.4
 
 | Feature | 1.2 | 1.3 | 1.4 |
 |---------|-----|-----|-----|
+| **Automatic main()** | ❌ | ❌ | ✅ |
 | **String interpolation** | ❌ | ✅ | ✅ |
 | **Else symbol (`⤵️`)** | ❌ | ✅ | ✅ |
 | **Property access (`.length`)** | ❌ | ✅ | ✅ |

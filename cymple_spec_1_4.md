@@ -20,7 +20,23 @@ Key characteristics:
 
 ## What's New in Version 1.4
 
-### 1. Enhanced Quantum Operations
+### 1. Automatic main() Execution
+
+Programs can now define a `main()` function as entry point:
+
+```cymple
+🧵 helper() -> 🔢
+    ↩ 42
+
+🧵 main()
+    💬 "Program starts here"
+    🔢result ← helper()
+    💬 "Result: 🔢result"
+```
+
+If a `main()` function exists, it is automatically called after all top-level code executes. This provides consistency with C, Go, Java, and Rust.
+
+### 2. Enhanced Quantum Operations
 
 Version 1.4 significantly improves parallel task execution with better control and visibility:
 
@@ -454,6 +470,16 @@ Match expressions with destructuring and guards:
 🔢result ← add(5, 3)
 greet("Alice")
 ```
+
+**Entry point (main):**
+```cymple
+🧵 main()
+    💬 "Program starts here"
+    🔢result ← calculate()
+    💬 "Result: 🔢result"
+```
+
+If a function named `main()` exists, it is automatically called after all top-level statements are executed. This provides a standard entry point similar to C, Go, Java, and Rust.
 
 ---
 
@@ -1070,6 +1096,7 @@ Traditional parallel programming is verbose and error-prone. Quantum operations 
 ## Version History
 
 ### Version 1.4 (2025-12-04)
+- **NEW**: Automatic `main()` function execution as entry point
 - **NEW**: Timeout with time units (`5s`, `500ms`, `2m`, `1h`)
 - **NEW**: Progress event frequency control (`every N`)
 - **NEW**: Early cancellation with `🛑` in Collect

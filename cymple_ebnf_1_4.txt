@@ -447,7 +447,50 @@ Borrowing:
 - Cannot return borrowed values
 - Cannot send via channels
 
-8. SCOPING RULES
+8. PROGRAM EXECUTION
+
+Entry Point (NEW in 1.4):
+- If function "main()" exists → automatically called after all top-level code
+- Optional - programs without main() work normally
+- Provides standard entry point like C, Go, Java, Rust
+
+Execution order:
+1. All top-level statements executed (functions defined, variables initialized)
+2. If main() function exists → main() automatically called
+3. Program terminates
+
+Example with main():
+  🔢global ← 1                     📝 Executes first
+  
+  🧵 helper() -> 🔢
+      🔢global ← 🔢global + 1
+      ↩ 🔢global
+  
+  🧵 main()                         📝 Auto-called after top-level
+      💬 "Program starts"
+      🔢x ← helper()                📝 global becomes 2
+      💬 "Result: 🔢x"              📝 Outputs "Result: 2"
+  
+  💬 "Top-level code"              📝 Executes second (before main)
+
+Output:
+  Top-level code
+  Program starts
+  Result: 2
+
+Example without main():
+  🧵 helper() -> 🔢
+      ↩ 42
+  
+  💬 "Direct execution"
+  🔢x ← helper()
+  💬 "Result: 🔢x"
+
+Output:
+  Direct execution
+  Result: 42
+
+9. SCOPING RULES
 
 Global:
 - Top-level constants (📘)
@@ -463,14 +506,14 @@ Block:
 - If/else variables
 - Borrow aliases
 
-9. ENCODING & NORMALIZATION
+10. ENCODING & NORMALIZATION
 
 - UTF-8 encoding required
 - NFC normalization before tokenization
 - TAB (U+0009) for indentation only
 - Line endings normalized to \n
 
-10. RESERVED SYMBOLS (v1.4)
+11. RESERVED SYMBOLS (v1.4)
 
 Cannot be redefined:
 - All emoji type prefixes (🔢, 🔤, etc.)
@@ -519,6 +562,42 @@ total_failure_event
 → "❌ 🔤total_failure
       💬 \"All failed\"
       ↩ false"
+
+Example 4: Automatic main() Execution (New v1.4)
+-------------------------------------------------
+
+Note: main() auto-execution is a SEMANTIC feature, not syntactic.
+The syntax is just normal function definitions.
+
+Syntax derivation:
+program
+→ statement_list
+→ function_def function_def output_stmt
+→ "🧵 helper() -> 🔢
+      ↩ 42
+   🧵 main()
+      🔢x ← helper()
+      💬 \"x: 🔢x\"
+   💬 \"Before main\""
+
+Runtime semantics (execution order):
+1. Top-level code runs: Define helper(), define main(), output "Before main"
+2. Check if function "main" exists → YES
+3. Automatically call main()
+4. main() executes: calls helper(), outputs "x: 42"
+
+Final output:
+  Before main
+  x: 42
+
+Without main() (comparison):
+  "🧵 helper() -> 🔢
+      ↩ 42
+   🔢x ← helper()
+   💬 \"x: 🔢x\""
+
+Execution: Define helper(), call helper(), output "x: 42"
+Output: x: 42
 
 ================================================
 End of EBNF Grammar - Cymple 1.4
