@@ -1,8 +1,9 @@
 # CYMPLE Programming Language
 
-**Version 1.4** - Procedural Programming with Unicode Symbols
-**Simple Interpreter** - Find it at the bottom of https://cymple.dev
-
+- **Version 1.4** - Procedural Programming with Unicode Symbols
+- **Simple Interpreter** - Find it at the bottom of https://cymple.dev
+- **HTML** - cymple_interpreter.html in this repo does the same
+ 
 ---
 
 ## What is Cymple?
