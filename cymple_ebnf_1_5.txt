@@ -1,0 +1,573 @@
+(* ============================================ *)
+(* CYMPLE EBNF Grammar – Version 1.5           *)
+(* Date: December 15, 2025                      *)
+(* Focus: Memory Safety, Validated Handles      *)
+(* ============================================ *)
+
+(* NORMATIVE STATUS:
+   This grammar is the FORMAL specification for Cymple 1.5 syntax.
+   All implementations MUST conform to this grammar.
+*)
+
+(* ============================================ *)
+(* CHANGES FROM 1.4 TO 1.5                     *)
+(* ============================================ *)
+
+(* REMOVED:
+   - Pointer types (*🔢, *🔤, etc.)
+   - Pointer arithmetic
+   - Dereference operators
+   
+   ADDED:
+   - handle_type production (💾, 📡, 📄, 🌐)
+   - Memory block operations (allocate, release)
+   - Validated handle indexing
+   - Guru meditation (error handling)
+   - Enhanced quantum operations
+*)
+
+(* ============================================ *)
+(* LEXICAL ELEMENTS                            *)
+(* ============================================ *)
+
+program             = { statement } ;
+
+statement           = variable_declaration
+                    | assignment
+                    | function_declaration
+                    | function_call
+                    | control_flow
+                    | loop
+                    | match_statement
+                    | quantum_operation
+                    | task_spawn
+                    | channel_operation
+                    | borrow_statement
+                    | guru_meditation
+                    | comment
+                    | expression_statement
+                    ;
+
+(* ============================================ *)
+(* TYPES (v1.5: handle_type NOW DEFINED)       *)
+(* ============================================ *)
+
+type_spec           = type_prefix , [ ":" , type_constraint ] ;
+
+type_prefix         = "🔢"              (* number *)
+                    | "🔤"              (* string *)
+                    | "✅"              (* boolean *)
+                    | "📋"              (* array *)
+                    | "🗺️"              (* map *)
+                    | "🧱"              (* struct *)
+                    | handle_type       (* HANDLES - NEW IN 1.5 *)
+                    ;
+
+(* NEW IN 1.5: Handle types are FORMALLY defined *)
+handle_type         = "💾"              (* memory block handle *)
+                    | "📡"              (* channel handle *)
+                    | "📄"              (* file handle *)
+                    | "🌐"              (* network handle *)
+                    ;
+
+(* SEMANTIC NOTE v1.5:
+   Handles are opaque, validated references.
+   Runtime MUST maintain:
+   - Handle table with slots
+   - Generation counters per slot
+   - Kind/type tags
+   - Validation on EVERY use
+*)
+
+type_constraint     = identifier
+                    | number_literal
+                    ;
+
+(* ============================================ *)
+(* MEMORY OPERATIONS (NEW IN 1.5)              *)
+(* ============================================ *)
+
+(* Memory block allocation *)
+allocate_expr       = "allocate" , "(" , expression , ")" ;
+
+(* SEMANTIC NOTE v1.5:
+   allocate(size) MUST:
+   1. Allocate 'size' bytes on heap
+   2. Return validated handle (💾 type)
+   3. Initialize handle table entry
+   4. Panic on allocation failure
+*)
+
+(* Memory block release *)
+release_stmt        = "release" , "(" , expression , ")" ;
+
+(* SEMANTIC NOTE v1.5:
+   release(handle) MUST:
+   1. Validate handle
+   2. Free the resource
+   3. Increment generation counter
+   4. Mark slot as unoccupied
+   Handle becomes stale after release.
+*)
+
+(* Handle indexing (validated) *)
+handle_index_expr   = expression , "[" , expression , "]" ;
+
+(* SEMANTIC NOTE v1.5:
+   handle[index] MUST perform:
+   1. Handle validation (slot, generation, kind)
+   2. Bounds checking (0 <= index < size)
+   3. Panic on validation or bounds failure
+   This applies to BOTH read and write.
+*)
+
+(* ============================================ *)
+(* VARIABLES & ASSIGNMENT                      *)
+(* ============================================ *)
+
+variable_declaration = type_spec , identifier , [ "←" , expression ] ;
+
+assignment          = identifier , "←" , expression ;
+
+(* ============================================ *)
+(* EXPRESSIONS                                 *)
+(* ============================================ *)
+
+expression          = logical_or ;
+
+logical_or          = logical_and , { "||" , logical_and } ;
+
+logical_and         = equality , { "&&" , equality } ;
+
+equality            = comparison , { ( "==" | "≠" ) , comparison } ;
+
+comparison          = additive , { ( "<" | ">" | "<=" | ">=" ) , additive } ;
+
+additive            = multiplicative , { ( "+" | "-" ) , multiplicative } ;
+
+multiplicative      = unary , { ( "*" | "/" | "%" ) , unary } ;
+
+unary               = [ ( "!" | "-" ) ] , primary ;
+
+primary             = number_literal
+                    | string_literal
+                    | boolean_literal
+                    | null_literal
+                    | identifier
+                    | allocate_expr           (* NEW 1.5 *)
+                    | handle_index_expr       (* NEW 1.5 *)
+                    | function_call
+                    | channel_receive
+                    | array_literal
+                    | map_literal
+                    | "(" , expression , ")"
+                    ;
+
+expression_statement = expression ;
+
+(* ============================================ *)
+(* FUNCTIONS                                   *)
+(* ============================================ *)
+
+function_declaration = "🧵" , identifier , "(" , [ parameter_list ] , ")" ,
+                       [ "->" , type_spec ] ,
+                       INDENT , statement_block , DEDENT ;
+
+parameter_list      = parameter , { "," , parameter } ;
+
+parameter           = identifier , ":" , type_spec ;
+
+function_call       = identifier , "(" , [ argument_list ] , ")" ;
+
+argument_list       = expression , { "," , expression } ;
+
+(* ============================================ *)
+(* CONTROL FLOW                                *)
+(* ============================================ *)
+
+control_flow        = if_statement
+                    | return_statement
+                    | throw_statement
+                    ;
+
+if_statement        = "❓" , expression ,
+                      INDENT , statement_block , DEDENT ,
+                      [ "❌" , INDENT , statement_block , DEDENT ] ;
+
+return_statement    = "↩" , [ expression ] ;
+
+throw_statement     = "❌" , identifier , "(" , string_literal , ")" ,
+                      [ "->" , number_literal ] ;
+
+(* ============================================ *)
+(* LOOPS                                       *)
+(* ============================================ *)
+
+loop                = for_loop
+                    | while_loop
+                    | foreach_loop
+                    ;
+
+for_loop            = "🔁" , identifier , "=" , expression , ".." , expression ,
+                      INDENT , statement_block , DEDENT ;
+
+while_loop          = "🔁" , expression ,
+                      INDENT , statement_block , DEDENT ;
+
+foreach_loop        = "🔁" , identifier , "in" , expression ,
+                      INDENT , statement_block , DEDENT ;
+
+(* ============================================ *)
+(* PATTERN MATCHING                            *)
+(* ============================================ *)
+
+match_statement     = "🔀" , expression ,
+                      INDENT , match_arms , DEDENT ;
+
+match_arms          = match_arm , { match_arm } ;
+
+match_arm           = "➜" , pattern ,
+                      INDENT , statement_block , DEDENT ;
+
+pattern             = literal
+                    | identifier
+                    | "_"           (* wildcard *)
+                    ;
+
+(* ============================================ *)
+(* BORROWING                                   *)
+(* ============================================ *)
+
+borrow_statement    = "🔗" , expression , "->" , [ "mut" ] , identifier ,
+                      INDENT , statement_block , DEDENT ;
+
+(* SEMANTIC NOTE v1.5:
+   Borrowing MUST enforce:
+   - ONE mutable borrow XOR multiple read-only borrows
+   - Original handle unusable while borrowed
+   - Borrow ends at DEDENT
+   - Borrowed handle validated on every use
+*)
+
+(* ============================================ *)
+(* QUANTUM OPERATIONS (FORMALIZED v1.5)        *)
+(* ============================================ *)
+
+quantum_operation   = quantum_race
+                    | quantum_collect
+                    ;
+
+(* Race: First successful result wins *)
+quantum_race        = "🌀⚡" , type_spec , identifier , "←" , task_array ,
+                      INDENT , quantum_body , DEDENT ;
+
+(* SEMANTIC NOTE v1.5:
+   Race MUST:
+   1. Start all tasks concurrently
+   2. Wait for first successful completion
+   3. Cancel ALL other tasks immediately
+   4. Return the winning result
+   5. Enforce task cap (queue excess)
+*)
+
+(* Collect: Gather all results *)
+quantum_collect     = "🌀📦" , type_spec , identifier , "←" , task_array ,
+                      INDENT , quantum_body , DEDENT ;
+
+(* SEMANTIC NOTE v1.5:
+   Collect MUST:
+   1. Start all tasks concurrently (subject to cap)
+   2. Wait for all completions
+   3. Return array of results
+   4. Support early cancellation via 🛑
+   5. Support progress events via ⏩
+*)
+
+task_array          = "[" , task_list , "]" ;
+
+task_list           = function_call , { "," , function_call } ;
+
+quantum_body        = { quantum_clause } ;
+
+quantum_clause      = timeout_clause
+                    | progress_clause
+                    | success_clause
+                    | failure_clause
+                    ;
+
+(* Timeout: Maximum wait time *)
+timeout_clause      = "⏱️" , duration ,
+                      INDENT , statement_block , DEDENT ;
+
+(* SEMANTIC NOTE v1.5:
+   Timeout MUST:
+   - Fire if no completion within duration
+   - Cancel all running tasks
+   - Execute timeout handler
+   - Be checked at runtime (not compile time)
+*)
+
+duration            = number_literal , time_unit ;
+
+time_unit           = "s" | "m" | "h" | "ms" | "us" ;
+
+(* Progress: Partial results *)
+progress_clause     = "⏩" , type_spec , identifier ,
+                      [ "every" , number_literal ] ,
+                      INDENT , statement_block , DEDENT ;
+
+(* SEMANTIC NOTE v1.5:
+   Progress MAY:
+   - Fire after every N completions
+   - Provide partial results array
+   - Allow early cancellation via 🛑
+   - Be rate-limited by implementation
+*)
+
+(* Success: All completed *)
+success_clause      = "✅" , pattern ,
+                      INDENT , statement_block , DEDENT ;
+
+(* Failure: All failed (Collect only) *)
+failure_clause      = "❌" , pattern ,
+                      INDENT , statement_block , DEDENT ;
+
+(* Stop signal: Cancel remaining tasks *)
+stop_signal         = "🛑" ;
+
+(* SEMANTIC NOTE v1.5:
+   Stop signal (🛑) MUST:
+   1. Be valid only within quantum operation scope
+   2. Cancel ALL remaining tasks in that operation
+   3. Return immediately with partial results
+   4. Not affect other quantum operations
+   5. Be idempotent (multiple 🛑 = one 🛑)
+*)
+
+(* ============================================ *)
+(* TASKS & CHANNELS                            *)
+(* ============================================ *)
+
+task_spawn          = "🧵" , [ "detach" ] , function_call ;
+
+(* SEMANTIC NOTE v1.5:
+   Task spawn MUST:
+   - Count toward runtime task cap
+   - Be joined/cancelled at scope exit (unless detached)
+   - With 'detach': survive parent scope (with warning)
+*)
+
+channel_operation   = channel_create
+                    | channel_send
+                    | channel_receive
+                    | channel_close
+                    ;
+
+channel_create      = "🛰️" , type_spec , [ ":" , number_literal ] ;
+
+(* SEMANTIC NOTE v1.5:
+   Channel create MUST:
+   - Return validated handle (📡 type)
+   - Optional buffer size (default: implementation-defined)
+   - Initialize as "open" state
+*)
+
+channel_send        = "🚀" , expression , "," , expression ;
+
+(* SEMANTIC NOTE v1.5:
+   Channel send MUST:
+   1. Validate channel handle
+   2. Check channel is open
+   3. Type-check message
+   4. Block if buffer full
+   5. Panic if channel closed
+*)
+
+channel_receive     = "🎯" , expression ;
+
+(* SEMANTIC NOTE v1.5:
+   Channel receive MUST:
+   1. Validate channel handle
+   2. Block until message available
+   3. Return null/special value if closed and empty
+   4. Return typed value otherwise
+*)
+
+channel_close       = "close" , "(" , expression , ")" ;
+
+(* SEMANTIC NOTE v1.5:
+   Channel close MUST:
+   1. Validate channel handle
+   2. Mark channel as "closed"
+   3. Wake blocked receivers (return null)
+   4. Panic on subsequent sends
+   5. Be idempotent (second close may panic or no-op)
+*)
+
+(* ============================================ *)
+(* ERROR HANDLING (GURU MEDITATION) - NEW 1.5  *)
+(* ============================================ *)
+
+guru_meditation     = "🧘" , "guru" , "(" , identifier , ")" ,
+                      INDENT , guru_body , DEDENT ;
+
+guru_body           = statement_block ;
+
+(* SEMANTIC NOTE v1.5:
+   Guru meditation MUST:
+   1. Catch all panics in its scope
+   2. Receive error object with:
+      - type: string (error type)
+      - code: number (error code)
+      - message: string (description)
+      - location: string (file:line)
+      - details: map (context)
+   3. May rethrow with: 💀 identifier
+   4. Inner Guru overrides outer Guru
+   5. Execute during stack unwinding
+*)
+
+rethrow_statement   = "💀" , identifier ;
+
+(* ============================================ *)
+(* COMMENTS                                    *)
+(* ============================================ *)
+
+comment             = "📝" , text , NEWLINE
+                    | "📝" , INDENT , text_block , DEDENT ;
+
+(* ============================================ *)
+(* LITERALS                                    *)
+(* ============================================ *)
+
+number_literal      = digit , { digit } , [ "." , digit , { digit } ] ;
+
+string_literal      = '"' , { character } , '"' ;
+
+boolean_literal     = "true" | "false" ;
+
+null_literal        = "null" ;
+
+array_literal       = "[" , [ expression_list ] , "]" ;
+
+map_literal         = "{" , [ map_entry_list ] , "}" ;
+
+expression_list     = expression , { "," , expression } ;
+
+map_entry_list      = map_entry , { "," , map_entry } ;
+
+map_entry           = expression , ":" , expression ;
+
+(* ============================================ *)
+(* IDENTIFIERS                                 *)
+(* ============================================ *)
+
+identifier          = letter , { letter | digit | "_" } ;
+
+letter              = "a".."z" | "A".."Z" ;
+
+digit               = "0".."9" ;
+
+(* ============================================ *)
+(* LAYOUT (INDENTATION-SENSITIVE)              *)
+(* ============================================ *)
+
+INDENT              = (* increase indentation level by 1 tab *) ;
+
+DEDENT              = (* decrease indentation level by 1 tab *) ;
+
+NEWLINE             = (* line break: LF or CRLF *) ;
+
+statement_block     = statement , { statement } ;
+
+(* ============================================ *)
+(* SEMANTIC NOTES - VALIDATION REQUIREMENTS    *)
+(* ============================================ *)
+
+(* HANDLE VALIDATION (applies to ALL handle operations):
+   
+   Runtime MUST validate EVERY handle use:
+   1. Slot in range? (handle.slot < table.length)
+   2. Slot occupied? (table[slot].occupied == true)
+   3. Generation matches? (handle.gen == table[slot].gen)
+   4. Kind matches? (handle.kind == table[slot].kind)
+   
+   On validation failure: Runtime MUST panic with:
+   - InvalidHandle (slot out of range)
+   - StaleHandle (generation mismatch)
+   - TypeError (kind mismatch)
+   
+   This applies to:
+   - handle[index] (memory blocks)
+   - 🚀/🎯 (channels)
+   - File operations
+   - Network operations
+*)
+
+(* BOUNDS CHECKING (memory blocks):
+   
+   For every handle[index] operation:
+   1. Perform handle validation (above)
+   2. Check: 0 <= index < block.size
+   3. On failure: Panic with BoundsError
+   
+   Compiler MAY optimize checks within single borrow scope.
+   Compiler MUST NOT optimize across function calls.
+   In debug mode: ALL checks MUST be performed.
+*)
+
+(* STRUCTURED CONCURRENCY:
+   
+   Task lifecycle MUST be:
+   1. Created: Task object allocated
+   2. Queued: Waiting for task slot (if cap reached)
+   3. Running: Actively executing
+   4. Completed/Cancelled/Failed: Terminal state
+   
+   Scope exit MUST:
+   - Join all non-detached tasks OR
+   - Cancel all non-detached tasks
+   - Wait for cancellation to complete
+   - Execute RAII cleanup in reverse order
+   
+   Task cap MUST be enforced:
+   - Default: 1000 tasks (configurable)
+   - On limit: Block task creation until slot available
+   - Never silently drop or queue indefinitely
+*)
+
+(* CHANNEL STATE MACHINE:
+   
+   Channel states: Open → Closed
+   
+   Transitions:
+   - Create: → Open
+   - close(): Open → Closed
+   - Scope exit (RAII): Open → Closed
+   
+   Operations in Closed state:
+   - Send: PANIC (ChannelClosed)
+   - Receive (empty): Return null
+   - Receive (has data): Return data then null
+   - Loop: Exit when empty
+*)
+
+(* PANIC & UNWINDING:
+   
+   On panic, runtime MUST:
+   1. Stop current operation immediately
+   2. Unwind call stack (innermost to outermost)
+   3. For each frame:
+      a. Execute RAII cleanup (release handles)
+      b. Check for Guru handler
+      c. If Guru found: call with error object
+      d. If Guru handles: resume normal execution
+      e. If Guru rethrows or not found: continue unwinding
+   4. If unwinding reaches top: terminate task/program
+   
+   RAII cleanup MUST occur in reverse allocation order.
+*)
+
+(* ============================================ *)
+(* END OF GRAMMAR                              *)
+(* ============================================ *)

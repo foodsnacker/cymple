@@ -1,6 +1,6 @@
 # CYMPLE Version Comparison
 
-Comparing Cymple versions 1.2, 1.3, 1.4, and 1.5
+Comparing Cymple versions 1.2, 1.3, and 1.4
 
 ---
 
@@ -8,122 +8,49 @@ Comparing Cymple versions 1.2, 1.3, 1.4, and 1.5
 
 | Version | Release Date | Focus | Status |
 |---------|-------------|-------|---------|
-
-
-## Breaking Changes Matrix
-
-**Legend:**
-- 🔴 Breaking: Code changes required
-- 🟡 Semantic: Behavior changes, code may still work
-- 🟢 Compatible: Backward compatible
-
-### 1.4 → 1.5 Changes
-
-| Feature Area | Type | Description | Migration |
-|--------------|------|-------------|-----------|
-| **Pointers** | 🔴 Breaking | Completely removed | Rewrite with handles |
-| **EBNF Grammar** | 🟡 Semantic | Now version 1.5, formal | Update parsers |
-| **Handle Validation** | 🟡 Semantic | Now explicit in spec | Add error handling |
-| **Task Cap** | 🟡 Semantic | Now enforced by default | Test with cap |
-| **Scope Exit** | 🟡 Semantic | Formal join/cancel rules | Review task lifetimes |
-| **Race Determinism** | 🟡 Semantic | Lowest-index rule formal | Tests may change |
-| **Channel Close** | 🟢 Compatible | Can be explicit or RAII | No change needed |
-| **Panic Unwinding** | 🟡 Semantic | RAII order now formal | Review cleanup order |
-| **Error Codes** | 🟢 Compatible | Standardized codes | Can add to Guru |
-
----
-
 | **1.2** | 2025-11-28 | Production-ready baseline | Final |
 | **1.3** | 2025-12-02 | Ergonomics & clarity | Superseded |
-| **1.4** | 2025-12-04 | Parallel programming power | Superseded |
-| **1.5** | 2025-12-15 | Memory safety & **formal spec** | **Current** |
+| **1.4** | 2025-12-04 | Parallel programming power | **Current** |
 
 ---
 
-
-| **1.5** | 2025-12-15 | Memory safety & **formal spec** | **Current** |
-
----
-
-## Key Changes in 1.5
-
-### Safety Features
-
-| Feature | 1.4 | 1.5 |
-|---------|-----|-----|
-| **Pointers** | ✅ | ❌ **Removed** |
-| **Generational Handles** | ❌ | ✅ **New** |
-| **Use-after-free detection** | ❌ | ✅ **New** |
-| **Bounds checking** | ⚠️ Partial | ✅ **Required** |
-| **Structured concurrency** | ❌ | ✅ **New** |
-| **Runtime task cap** | ❌ | ✅ **New** |
-
----
-
- Feature Matrix
+## Feature Matrix
 
 ### Core Language Features
 
-| Feature | 1.2 | 1.3 | 1.4 | 1.5 |
-|---------|-----|-----|-----|-----|
-| **Automatic main()** | ❌ | ❌ | ✅ | ✅ |
-| **String interpolation** | ❌ | ✅ | ✅ | ✅ |
-| **Else symbol (`⤵️`)** | ❌ | ✅ | ✅ | ✅ |
-| **Property access (`.length`)** | ❌ | ✅ | ✅ | ✅ |
-| **Range loop (`i = 1..10`)** | ❌ | ✅ | ✅ | ✅ |
-| **Optional void return** | ❌ | ✅ | ✅ | ✅ |
-| **Comparison (`==`)** | ⚠️ Used `=` | ✅ | ✅ | ✅ |
-| **Logical ops (`&&`, `||`)** | ⚠️ Used `&`, `|` | ✅ | ✅ | ✅ |
-| **Break/Continue** | ❌ | ❌ | ❌ | ❌ **Intentionally absent** |
+| Feature | 1.2 | 1.3 | 1.4 |
+|---------|-----|-----|-----|
+| **Automatic main()** | ❌ | ❌ | ✅ |
+| **String interpolation** | ❌ | ✅ | ✅ |
+| **Else symbol (`⤵️`)** | ❌ | ✅ | ✅ |
+| **Property access (`.length`)** | ❌ | ✅ | ✅ |
+| **Range loop (`i = 1..10`)** | ❌ | ✅ | ✅ |
+| **Optional void return** | ❌ | ✅ | ✅ |
+| **Comparison (`==`)** | ⚠️ Used `=` | ✅ | ✅ |
+| **Logical ops (`&&`, `||`)** | ⚠️ Used `&`, `|` | ✅ | ✅ |
 
 ### Quantum Operations
 
-| Feature | 1.2 | 1.3 | 1.4 | 1.5 |
-|---------|-----|-----|-----|-----|
-| **Race (`🌀⚡`)** | ✅ Basic | ✅ | ✅ Enhanced | ✅ **Core** |
-| **Collect (`🌀📦`)** | ✅ Basic | ✅ | ✅ Enhanced | ✅ **Core** |
-| **Timeout** | ✅ Numbers only | ✅ | ✅ **Time units** | ✅ |
-| **Race progress events** | ✅ | ✅ | ❌ **Removed** | ❌ |
-| **Collect progress** | ✅ Every task | ✅ | ✅ **`every N`** | ✅ |
-| **Early cancellation** | ❌ | ❌ | ✅ **`🛑`** | ✅ |
-| **Total failure event** | ❌ | ❌ | ✅ **New** | ✅ |
-| **Universal stop (`🛑`)** | ⚠️ Partial | ⚠️ Partial | ✅ **Universal** | ✅ **Formally specified** |
+| Feature | 1.2 | 1.3 | 1.4 |
+|---------|-----|-----|-----|
+| **Race (`🌀⚡`)** | ✅ Basic | ✅ | ✅ Enhanced |
+| **Collect (`🌀📦`)** | ✅ Basic | ✅ | ✅ Enhanced |
+| **Timeout** | ✅ Numbers only | ✅ | ✅ **Time units** |
+| **Race progress events** | ✅ | ✅ | ❌ **Removed** |
+| **Collect progress** | ✅ Every task | ✅ | ✅ **`every N`** |
+| **Early cancellation** | ❌ | ❌ | ✅ **`🛑`** |
+| **Total failure event** | ❌ | ❌ | ✅ **New** |
+| **Universal stop (`🛑`)** | ⚠️ Partial | ⚠️ Partial | ✅ **Universal** |
 
 ### Memory & Safety
 
-| Feature | 1.2 | 1.3 | 1.4 | 1.5 |
-|---------|-----|-----|-----|-----|
-| **Move semantics** | ✅ | ✅ | ✅ | ✅ |
-| **Borrowing** | ✅ | ✅ | ✅ | ✅ |
-| **RAII** | ✅ | ✅ | ✅ | ✅ **Formal** |
-| **No GC** | ✅ | ✅ | ✅ | ✅ |
-| **Share-nothing** | ✅ | ✅ | ✅ | ✅ |
-| **Pointers** | ✅ | ✅ | ✅ | ❌ **Removed** |
-| **Generational handles** | ❌ | ❌ | ❌ | ✅ **New** |
-| **Bounds checking** | ⚠️ | ⚠️ | ⚠️ | ✅ **Required** |
-| **Structured concurrency** | ❌ | ❌ | ❌ | ✅ **New** |
-
----
-
-### Documentation & Specification
-
-| Feature | 1.2 | 1.3 | 1.4 | 1.5 |
-|---------|-----|-----|-----|-----|
-| **RFC 2119 keywords** | ❌ | ❌ | ❌ | ✅ **New** |
-| **Design principles** | ❌ Implicit | ❌ Implicit | ❌ Implicit | ✅ **Explicit** |
-| **Statement index** | ❌ | ❌ | ❌ | ✅ **New** |
-| **Function return semantics** | ⚠️ Unclear | ⚠️ Unclear | ⚠️ Unclear | ✅ **Clarified** |
-| **Error code ranges** | ❌ | ❌ | ⚠️ Partial | ✅ **Structured** |
-| **Formal semantics** | ❌ | ❌ | ⚠️ Partial | ✅ **Complete** |
-| **EBNF comments** | ⚠️ Basic | ⚠️ Basic | ✅ Enhanced | ✅ **Enhanced** |
-
-**1.5 Documentation Highlights:**
-- First version with RFC 2119 conformance keywords (MUST/SHOULD/MAY)
-- Explicit design principles (Safety First, Determinism, Explicitness, Fail-Fast, Minimalism)
-- Statement reference index maps EBNF to semantic sections
-- Clear function return rules for typed/untyped/void functions
-- Organized error code ranges (1000-1999: Memory, 2000-2999: Channels, etc.)
-- Complete formal semantics for task lifecycle, scope exit, race determinism
+| Feature | 1.2 | 1.3 | 1.4 |
+|---------|-----|-----|-----|
+| **Move semantics** | ✅ | ✅ | ✅ |
+| **Borrowing** | ✅ | ✅ | ✅ |
+| **RAII** | ✅ | ✅ | ✅ |
+| **No GC** | ✅ | ✅ | ✅ |
+| **Share-nothing** | ✅ | ✅ | ✅ |
 
 ---
 
@@ -464,63 +391,22 @@ All backward compatible:
 ├─ Total failure detection
 ├─ Simplified Race
 └─ Universal stop signal
-
-1.5 (Dec 2025)
-├─ Pointers removed
-├─ Generational handle validation
-├─ Structured concurrency
-├─ Runtime task cap
-├─ Formal specification
-└─ Design principles documented
 ```
-
----
-
-## Design Philosophy Notes
-
-### Why No Break/Continue?
-
-Cymple 1.5 intentionally omits `break` and `continue` statements as part of its **Minimalism** design principle.
-
-**Rationale:**
-- Functions and `return` statements are the primary control flow abstraction
-- Loops are intended to run to completion or return from enclosing function
-- Reduces cognitive load (fewer language constructs to learn)
-- Encourages cleaner function decomposition
-
-**Alternative patterns:**
-```cymple
-📝 Instead of break/continue - use functions:
-🧵 find_target(📋data) -> 🔢?
-    🔁 i = 0..data.length
-        ❓ found(data[i])
-            ↩ i  📝 Return = early exit
-        
-        ❓ should_skip(data[i])
-            📝 Do nothing = skip to next
-    
-    ↩ null  📝 Not found
-```
-
-**Future consideration:** If user demand is strong, break/continue could be added in a future version without breaking compatibility.
 
 ---
 
 ## Summary
 
-| Aspect | 1.2 | 1.3 | 1.4 | 1.5 |
-|--------|-----|-----|-----|-----|
-| **Maturity** | Baseline | Refined | Enhanced | **Hardened** |
-| **Ergonomics** | Good | Better | Best | Best |
-| **Parallel Perf** | Good | Good | Excellent | Excellent |
-| **Safety** | Good | Good | Good | **Excellent** |
-| **Specification** | Basic | Basic | Enhanced | **Formal** |
-| **Code Length** | Baseline | -10% | -15% | -15% |
-| **Readability** | Good | Better | Best | Best |
-| **Breaking Changes** | N/A | 3 | 1 | **1** |
-| **New Features** | N/A | 6 | 6 | **6** |
-| **Documentation** | Basic | Basic | Good | **Excellent** |
-| **Recommended** | ⚠️ Outdated | ⚠️ Superseded | ⚠️ Superseded | ✅ **Current** |
+| Aspect | 1.2 | 1.3 | 1.4 |
+|--------|-----|-----|-----|
+| **Maturity** | Baseline | Refined | Enhanced |
+| **Ergonomics** | Good | Better | Best |
+| **Parallel Perf** | Good | Good | Excellent |
+| **Code Length** | Baseline | -10% | -15% |
+| **Readability** | Good | Better | Best |
+| **Breaking Changes** | N/A | 3 | 1 |
+| **New Features** | N/A | 6 | 6 |
+| **Recommended** | ⚠️ Outdated | ⚠️ Superseded | ✅ **Current** |
 
 ---
 
@@ -528,7 +414,6 @@ Cymple 1.5 intentionally omits `break` and `continue` statements as part of its 
 
 - [Cymple 1.3 Changelog](cymple_1_3_changelog.md)
 - [Cymple 1.4 Changelog](cymple_1_4_changelog.md)
-- [Cymple 1.5 Changelog](cymple_1_5_changelog.md)
 
 ---
 
@@ -536,9 +421,8 @@ Cymple 1.5 intentionally omits `break` and `continue` statements as part of its 
 
 - [Cymple 1.3 Specification](cymple_spec_1_3.md)
 - [Cymple 1.4 Specification](cymple_spec_1_4.md)
-- [Cymple 1.5 Specification](cymple_spec_1_5.md)
 
 ---
 
-*Last updated: December 15, 2025*
+*Last updated: December 4, 2025*
 *© 2025 Jörg Burbach*

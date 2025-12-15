@@ -1,0 +1,1269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cymple 1.5 - Online Interpreter</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .version {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            margin-top: 10px;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .section {
+            margin-bottom: 40px;
+        }
+
+        .section h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.8em;
+        }
+
+        .editor-container {
+            display: grid;
+            grid-template-columns: 1fr 280px;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        #cymple-input {
+            width: 100%;
+            min-height: 450px;
+            padding: 15px;
+            font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
+            font-size: 0.9em;
+            background: #1e1e1e;
+            color: #d4d4d4;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            resize: vertical;
+            white-space: pre;
+            tab-size: 4;
+        }
+
+        .syntax-panel {
+            background: #f8f9fa;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            padding: 15px;
+            max-height: 450px;
+            overflow-y: auto;
+        }
+
+        .syntax-panel h3 {
+            margin-top: 0;
+            color: #667eea;
+            font-size: 1em;
+        }
+
+        .syntax-panel p {
+            font-size: 0.85em;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .syntax-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .section-label {
+            color: #667eea;
+            font-weight: bold;
+            font-size: 0.85em;
+            margin-top: 5px;
+            margin-bottom: 5px;
+        }
+
+        .snippet-btn {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 8px 12px;
+            text-align: left;
+            cursor: pointer;
+            font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
+            font-size: 0.85em;
+            transition: all 0.2s;
+        }
+
+        .snippet-btn:hover {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .snippet-btn:active {
+            transform: scale(0.98);
+        }
+
+        .run-btn {
+            background: #667eea;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .run-btn:hover {
+            background: #5568d3;
+        }
+
+        .output {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+        }
+
+        .output strong {
+            color: #667eea;
+        }
+
+        .output pre {
+            margin-top: 10px;
+            font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .examples-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .example-btn {
+            background: white;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+            font-size: 0.95em;
+        }
+
+        .example-btn:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .warning {
+            margin: 20px 0;
+            padding: 15px;
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            color: #856404;
+            border-radius: 4px;
+        }
+
+        .warning strong {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .footer {
+            background: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            border-top: 1px solid #ddd;
+        }
+
+        .footer a {
+            color: #667eea;
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 900px) {
+            .editor-container {
+                grid-template-columns: 1fr;
+            }
+
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            .examples-grid {
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            }
+        }
+        
+        .clear-btn {
+    background: #dc3545;
+    color: white;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 6px;
+    font-size: 1em;
+    cursor: pointer;
+    transition: background 0.2s;
+    margin-left: 10px;
+}
+
+.clear-btn:hover {
+    background: #c82333;
+}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔣 CYMPLE</h1>
+            <p>Procedural Programming with Unicode Symbols</p>
+            <span class="version">Version 1.5 • 2025-12-15 • Memory Safety</span>
+        </div>
+
+        <div class="content">
+            <div class="section">
+                <h2>Try Cymple Online</h2>
+                <p>Edit the code and click "Run" to see the result. Click syntax snippets to insert them!</p>
+                
+                <div class="editor-container">
+                    <div>
+                        <textarea id="cymple-input">💬 "Hello, World!"</textarea>
+                        <button class="run-btn" onclick="runCympleCode()">▶️ Run Code</button>
+						<button class="clear-btn" onclick="clearCymple()" style="background: #dc3545; margin-left: 10px;">🗑️ Clear</button>
+                        <div id="cymple-output" class="output" style="display: none;">
+                            <strong>Output:</strong>
+                            <pre id="cymple-result"></pre>
+                        </div>
+                    </div>
+
+                    <div class="syntax-panel">
+                        <h3>📖 Syntax Quick Insert</h3>
+                        <p>Click to insert at cursor:</p>
+                        
+                        <div class="syntax-buttons">
+                            <div class="section-label">💬 Basic I/O</div>
+                            <button onclick="insertSnippet('output')" class="snippet-btn">💬 Output</button>
+                            <button onclick="insertSnippet('input')" class="snippet-btn">🔤🔽 Input</button>
+                            <button onclick="insertSnippet('comment')" class="snippet-btn">📝 Comment</button>
+                            
+                            <div class="section-label">🔢 Variables</div>
+                            <button onclick="insertSnippet('number')" class="snippet-btn">🔢 Number</button>
+                            <button onclick="insertSnippet('string')" class="snippet-btn">🔤 String</button>
+                            <button onclick="insertSnippet('assign')" class="snippet-btn">← Assignment</button>
+                            
+                            <div class="section-label">⚙️ Operations</div>
+                            <button onclick="insertSnippet('math')" class="snippet-btn">+ Math (+ - * / %)</button>
+                            <button onclick="insertSnippet('compare')" class="snippet-btn">== Compare (== != &lt; &gt;)</button>
+                            <button onclick="insertSnippet('increment')" class="snippet-btn">++ Increment</button>
+                            <button onclick="insertSnippet('interpolate')" class="snippet-btn">"🔢" Interpolation</button>
+                            
+                            <div class="section-label">🔀 Control Flow</div>
+                            <button onclick="insertSnippet('if')" class="snippet-btn">❓ If</button>
+                            <button onclick="insertSnippet('ifelse')" class="snippet-btn">❓⤵️ If-Else</button>
+                            <button onclick="insertSnippet('while')" class="snippet-btn">🔁 While Loop</button>
+                            
+                            <div class="section-label">🧵 Functions</div>
+                            <button onclick="insertSnippet('function')" class="snippet-btn">🧵 Function</button>
+                            <button onclick="insertSnippet('funccall')" class="snippet-btn">📞 Call Function</button>
+                            <button onclick="insertSnippet('main')" class="snippet-btn">🧵 main() <span style="color: #667eea;">1.5</span></button>
+                            <button onclick="insertSnippet('return')" class="snippet-btn">↩ Return</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Example Programs</h2>
+                <div class="examples-grid">
+                    <button onclick="loadExample('hello')" class="example-btn">📝 Hello World</button>
+                    <button onclick="loadExample('variables')" class="example-btn">🔢 Variables & Math</button>
+                    <button onclick="loadExample('input')" class="example-btn">🔤 Interactive Input</button>
+                    <button onclick="loadExample('ifelse')" class="example-btn">❓ If/Else</button>
+                    <button onclick="loadExample('loop')" class="example-btn">🔁 While Loop</button>
+                    <button onclick="loadExample('fibonacci')" class="example-btn">🧵 Fibonacci Function</button>
+                    <button onclick="loadExample('factorial')" class="example-btn">✨ Factorial</button>
+                    <button onclick="loadExample('countdown')" class="example-btn">⏱️ Countdown</button>
+                    <button onclick="loadExample('fizzbuzz')" class="example-btn">🎯 FizzBuzz</button>
+                    <button onclick="loadExample('sum')" class="example-btn">➕ Sum 1 to N</button>
+                    <button onclick="loadExample('drawing')" class="example-btn">🎨 ASCII Art</button>
+                </div>
+
+                <div class="warning">
+                    <strong>⚠️ Note:</strong> The following examples are theoretical. Quantum operations (Race and Collect) with full validation semantics are not implemented in this browser interpreter as of Cymple 1.5. They demonstrate syntax only. Full 1.5 features (handle validation, structured concurrency, bounds checking) require a native runtime.
+                </div>
+
+                <div class="examples-grid">
+                    <button onclick="loadExample('race_simple')" class="example-btn">🌀⚡ Race Example (1.5)</button>
+                    <button onclick="loadExample('race_timeout')" class="example-btn">⏱️ Race + Timeout (1.5)</button>
+                    <button onclick="loadExample('collect_progress')" class="example-btn">⏩ Collect + Progress (1.5)</button>
+                    <button onclick="loadExample('collect_cancel')" class="example-btn">🛑 Early Cancel (1.5)</button>
+                    <button onclick="loadExample('multi_search')" class="example-btn">🔍 Multi-Server Search (1.5)</button>
+                    <button onclick="loadExample('memory_safe')" class="example-btn">💾 Safe Memory Block (1.5)</button>
+                    <button onclick="loadExample('handle_validation')" class="example-btn">✅ Handle Validation (1.5)</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>Cymple 1.5 - A research language exploring memory-safe procedural programming with Unicode symbols</p>
+            <p><a href="https://github.com/foodsnacker/cymple" target="_blank">View on GitHub</a> | 
+               <a href="https://cymple.org" target="_blank">Documentation</a></p>
+        </div>
+    </div>
+
+<script>
+// Cymple 1.5 Interpreter
+// Note: This is a simplified interpreter for demonstration.
+// Full 1.5 features (handle validation, structured concurrency, bounds checking)
+// require a native runtime implementation.
+class CympleInterpreter {
+    constructor() {
+        this.output = [];
+        this.variables = {};
+        this.functions = {};
+        this.maxIterations = 10000;
+        this.debug = false;
+    }
+
+    run(code) {
+        this.output = [];
+        this.variables = {};
+        this.iterationCount = 0;
+        
+        const lines = code.split('\n');
+        
+        if (this.debug) {
+            console.log('Lines:', lines.map((l, i) => `${i}: [${this.getIndent(l)}] "${l}"`));
+        }
+        
+        this.executeBlock(lines, 0, lines.length);
+        
+        // NEW in 1.4: Auto-call main() if it exists
+        if (this.functions['main']) {
+            this.executeFunction('main', []);
+        }
+
+        return this.output.join('\n');
+    }
+
+    executeBlock(lines, startIdx, endIdx) {
+        let i = startIdx;
+        
+        while (i < endIdx) {
+            if (++this.iterationCount > this.maxIterations) {
+                throw new Error('Maximum iteration limit reached (possible infinite loop)');
+            }
+            
+            const line = lines[i];
+            const trimmedLine = line.trim();
+            const indent = this.getIndent(line);
+            
+            if (this.debug) {
+                console.log(`Executing line ${i}: [indent=${indent}] "${trimmedLine}"`);
+            }
+            
+            // Comments and empty lines
+            if (trimmedLine.startsWith('📝') || !trimmedLine) {
+                i++;
+                continue;
+            }
+            
+            // Clear Output: 🗑️
+            if (trimmedLine.startsWith('🗑️')) {
+                this.output = [];
+                if (this.debug) console.log('Output cleared');
+                i++;
+                continue;
+            }
+            
+            // Refresh Display: 🔄
+            if (trimmedLine.startsWith('🔄')) {
+                document.getElementById('cymple-output').style.display = 'block';
+                document.getElementById('cymple-result').textContent = this.output.join('\n') || '(no output)';
+                if (this.debug) console.log('Display refreshed');
+                i++;
+                continue;
+            }
+            
+            // Function definition: 🧵 name(params)
+            if (trimmedLine.startsWith('🧵')) {
+                const funcMatch = trimmedLine.match(/🧵\s*(\w+)\s*\(([^)]*)\)/);
+                if (funcMatch) {
+                    const [, name, params] = funcMatch;
+                    const funcBody = [];
+                    i++;
+                    
+                    while (i < endIdx && this.getIndent(lines[i]) > indent) {
+                        funcBody.push(lines[i]);
+                        i++;
+                    }
+                    
+                    this.functions[name] = {
+                        params: params.split(',').map(p => p.split(':')[0].trim()).filter(p => p),
+                        body: funcBody
+                    };
+                    continue;
+                }
+            }
+            
+            // Variable: 🔢name ← value or 🔤name ← value
+            if (trimmedLine.startsWith('🔢') || trimmedLine.startsWith('🔤')) {
+                const match = trimmedLine.match(/[🔢🔤](\w+)\s*←\s*(.+)/);
+                if (match) {
+                    const [, varName, valueExpr] = match;
+                    const result = this.evaluateExpression(valueExpr.trim());
+                    this.variables[varName] = result;
+                    
+                    if (this.debug) {
+                        console.log(`Set variable ${varName} = ${result}`, this.variables);
+                    }
+                }
+                i++;
+                continue;
+            }
+            
+            // While Loop: 🔁 condition
+            if (trimmedLine.startsWith('🔁')) {
+                let condition = trimmedLine.replace(/^🔁\s*/, '').trim();
+                
+                const loopBody = [];
+                const loopIndent = indent;
+                i++;
+                
+                if (this.debug) console.log(`While loop: condition="${condition}", loopIndent=${loopIndent}`);
+                
+                while (i < endIdx) {
+                    const lineIndent = this.getIndent(lines[i]);
+                    if (lineIndent > loopIndent) {
+                        loopBody.push(lines[i]);
+                        i++;
+                    } else {
+                        break;
+                    }
+                }
+                
+                if (this.debug) console.log(`Loop body (${loopBody.length} lines):`, loopBody);
+                
+                let loopCount = 0;
+                while (this.evaluateCondition(condition)) {
+                    if (++this.iterationCount > this.maxIterations) {
+                        throw new Error('Maximum iteration limit reached (possible infinite loop)');
+                    }
+                    
+                    loopCount++;
+                    if (this.debug) console.log(`Loop iteration ${loopCount}, variables:`, this.variables);
+                    
+                    const loopResult = this.executeBlock(loopBody, 0, loopBody.length);
+                    if (loopResult !== null && loopResult !== undefined) {
+                        return loopResult;
+                    }
+                }
+                
+                if (this.debug) console.log(`Loop finished after ${loopCount} iterations`);
+                continue;
+            }
+            
+            // If-Else: ❓ condition
+            if (trimmedLine.startsWith('❓')) {
+                let condition = trimmedLine.replace(/^❓\s*/, '').trim();
+                const ifIndent = indent;
+                i++;
+                
+                if (this.debug) console.log(`If condition: "${condition}"`);
+                
+                const thenBlock = [];
+                const elseBlock = [];
+                
+                while (i < endIdx && this.getIndent(lines[i]) > ifIndent && !lines[i].trim().startsWith('⤵️') && !lines[i].trim().startsWith('❌')) {
+                    thenBlock.push(lines[i]);
+                    i++;
+                }
+                
+                if (i < endIdx && (lines[i].trim().startsWith('⤵️') || lines[i].trim().startsWith('❌'))) {
+                    const elseIndent = this.getIndent(lines[i]);
+                    i++;
+                    while (i < endIdx && this.getIndent(lines[i]) > elseIndent) {
+                        elseBlock.push(lines[i]);
+                        i++;
+                    }
+                }
+                
+                if (this.evaluateCondition(condition)) {
+                    if (thenBlock.length > 0) {
+                        const result = this.executeBlock(thenBlock, 0, thenBlock.length);
+                        if (result !== null && result !== undefined) {
+                            return result;
+                        }
+                    }
+                } else if (elseBlock.length > 0) {
+                    const result = this.executeBlock(elseBlock, 0, elseBlock.length);
+                    if (result !== null && result !== undefined) {
+                        return result;
+                    }
+                }
+                continue;
+            }
+            
+            // Return: ↩ expression
+            if (trimmedLine.startsWith('↩')) {
+                let expr = trimmedLine.replace(/^↩\s*/, '').trim();
+                
+                if (this.debug) console.log(`Return: "${expr}"`);
+                
+                const result = this.evaluateExpression(expr);
+                
+                if (this.debug) console.log(`Return value: ${result}`);
+                
+                return result;
+            }
+            
+            // Function call: name(args)
+            const funcCallMatch = trimmedLine.match(/^(\w+)\s*\(([^)]*)\)/);
+            if (funcCallMatch && this.functions[funcCallMatch[1]]) {
+                const [, name, argsStr] = funcCallMatch;
+                const args = argsStr.split(',').map(a => this.evaluateExpression(a.trim()));
+                this.executeFunction(name, args);
+                i++;
+                continue;
+            }
+            
+            // Output: 💬 expression
+            if (trimmedLine.startsWith('💬')) {
+                let expr = trimmedLine.replace(/^💬\s*/, '').trim();
+                
+                if (this.debug) console.log(`Output expression: "${expr}"`);
+                
+                const result = this.evaluateExpression(expr);
+                const cleanResult = String(result).replace(/"/g, '');
+                this.output.push(cleanResult);
+                
+                if (this.debug) console.log(`Output: "${cleanResult}"`);
+                
+                i++;
+                continue;
+            }
+            
+            i++;
+        }
+        
+        return null;
+    }
+
+    executeFunction(name, args) {
+        const func = this.functions[name];
+        if (!func) return null;
+        
+        const savedVars = {...this.variables};
+        
+        func.params.forEach((param, idx) => {
+            this.variables[param] = args[idx];
+        });
+        
+        const result = this.executeBlock(func.body, 0, func.body.length);
+        
+        this.variables = savedVars;
+        
+        return result;
+    }
+
+    getIndent(line) {
+        let count = 0;
+        for (let char of line) {
+            if (char === '\t') {
+                count++;
+            } else if (char === ' ') {
+                count += 0.25;
+            } else {
+                break;
+            }
+        }
+        return Math.floor(count);
+    }
+
+    evaluateCondition(expr) {
+        expr = expr.trim();
+        
+        if (this.debug) console.log(`Evaluating condition: "${expr}"`);
+        
+        const operators = ['<=', '>=', '==', '!=', '<', '>'];
+        
+        for (const op of operators) {
+            const idx = expr.indexOf(op);
+            if (idx > 0) {
+                const left = expr.substring(0, idx).trim();
+                const right = expr.substring(idx + op.length).trim();
+                
+                const leftVal = this.evaluateExpression(left);
+                const rightVal = this.evaluateExpression(right);
+                
+                let result;
+                switch (op) {
+                    case '<=': result = leftVal <= rightVal; break;
+                    case '>=': result = leftVal >= rightVal; break;
+                    case '<': result = leftVal < rightVal; break;
+                    case '>': result = leftVal > rightVal; break;
+                    case '==': result = leftVal == rightVal; break;
+                    case '!=': result = leftVal != rightVal; break;
+                }
+                
+                if (this.debug) console.log(`  ${leftVal} ${op} ${rightVal} = ${result}`);
+                
+                return result;
+            }
+        }
+        
+        const value = this.evaluateExpression(expr);
+        return Boolean(value);
+    }
+
+evaluateExpression(expr) {
+    expr = expr.trim();
+    
+    // Input function: 🔤🔽 "prompt"
+    const inputMatch = expr.match(/🔤🔽\s*"([^"]*)"/);
+    if (inputMatch) {
+        const promptText = inputMatch[1];
+        const userInput = window.prompt(promptText);
+        
+        if (userInput === null) {
+            throw new Error('User cancelled');
+        }
+        
+        return userInput || '';
+    }
+    
+    // Variable with emoji prefix: Check each emoji type individually
+    let varName = null;
+    let emojiPrefix = '';
+    
+    if (expr.startsWith('🔢')) {
+        emojiPrefix = '🔢';
+        varName = expr.substring(2).trim();
+    } else if (expr.startsWith('🔤')) {
+        emojiPrefix = '🔤';
+        varName = expr.substring(2).trim();
+    } else if (expr.startsWith('📋')) {
+        emojiPrefix = '📋';
+        varName = expr.substring(2).trim();
+    } else if (expr.startsWith('🔘')) {
+        emojiPrefix = '🔘';
+        varName = expr.substring(2).trim();
+    } else if (expr.startsWith('🖼️')) {
+        emojiPrefix = '🖼️';
+        varName = expr.substring(3).trim(); // 🖼️ is 3 chars!
+    } else if (expr.startsWith('📦')) {
+        emojiPrefix = '📦';
+        varName = expr.substring(2).trim();
+    }
+    
+    // If we found an emoji prefix and it's just a variable (no operators)
+    if (varName && varName.match(/^\w+$/) && !expr.includes('+') && !expr.includes('-') && !expr.includes('*') && !expr.includes('/') && !expr.includes('%')) {
+        if (this.variables[varName] !== undefined) {
+            return this.variables[varName];
+        }
+        throw new Error('Variable \'' + emojiPrefix + varName + '\' is not defined');
+    }
+    
+    // Function call in expression
+    const funcCallMatch = expr.match(/^(\w+)\s*\(([^)]*)\)/);
+    if (funcCallMatch && this.functions[funcCallMatch[1]]) {
+        const [, name, argsStr] = funcCallMatch;
+        const args = argsStr ? argsStr.split(',').map(a => this.evaluateExpression(a.trim())) : [];
+        return this.executeFunction(name, args);
+    }
+    
+    // String literal WITH variable interpolation
+    if (expr.startsWith('"') && expr.endsWith('"')) {
+        let result = expr.slice(1, -1);
+        
+        // Replace all emoji-prefixed variables inside the string
+        for (const [varName, value] of Object.entries(this.variables)) {
+            result = result.replace(new RegExp('🔢' + varName, 'g'), value);
+            result = result.replace(new RegExp('🔤' + varName, 'g'), value);
+            result = result.replace(new RegExp('📋' + varName, 'g'), value);
+            result = result.replace(new RegExp('🔘' + varName, 'g'), value);
+            result = result.replace(new RegExp('🖼️' + varName, 'g'), value);
+            result = result.replace(new RegExp('📦' + varName, 'g'), value);
+        }
+        
+        // Check für nicht-ersetzte Variablen
+        const unreplacedNumber = result.match(/🔢\w+/g);
+        const unreplacedString = result.match(/🔤\w+/g);
+        const unreplacedList = result.match(/📋\w+/g);
+        const unreplacedBool = result.match(/🔘\w+/g);
+        const unreplacedImage = result.match(/🖼️\w+/g);
+        const unreplacedStruct = result.match(/📦\w+/g);
+        
+        const allUnreplaced = [
+            ...(unreplacedNumber || []),
+            ...(unreplacedString || []),
+            ...(unreplacedList || []),
+            ...(unreplacedBool || []),
+            ...(unreplacedImage || []),
+            ...(unreplacedStruct || [])
+        ];
+        
+        if (allUnreplaced.length > 0) {
+            throw new Error('Undefined variable(s) in string: ' + allUnreplaced.join(', '));
+        }
+        
+        return result;
+    }
+    
+    // String concatenation (still supported for compatibility)
+    if (expr.includes('+') && expr.includes('"')) {
+        const parts = [];
+        let current = '';
+        let inString = false;
+        
+        for (let i = 0; i < expr.length; i++) {
+            const char = expr[i];
+            
+            if (char === '"') {
+                inString = !inString;
+                current += char;
+            } else if (char === '+' && !inString) {
+                if (current.trim()) {
+                    parts.push(current.trim());
+                }
+                current = '';
+            } else {
+                current += char;
+            }
+        }
+        
+        if (current.trim()) {
+            parts.push(current.trim());
+        }
+        
+        const result = parts.map(p => {
+            p = p.trim();
+            if (p.startsWith('"') && p.endsWith('"')) {
+                let str = p.slice(1, -1);
+                for (const [varName, value] of Object.entries(this.variables)) {
+                    str = str.replace(new RegExp('🔢' + varName, 'g'), value);
+                    str = str.replace(new RegExp('🔤' + varName, 'g'), value);
+                    str = str.replace(new RegExp('📋' + varName, 'g'), value);
+                    str = str.replace(new RegExp('🔘' + varName, 'g'), value);
+                    str = str.replace(new RegExp('🖼️' + varName, 'g'), value);
+                    str = str.replace(new RegExp('📦' + varName, 'g'), value);
+                }
+                return str;
+            }
+            
+            // Check for emoji-prefixed variable
+            if (p.startsWith('🔢')) {
+                const vName = p.substring(2);
+                if (this.variables[vName] !== undefined) {
+                    return String(this.variables[vName]);
+                }
+                throw new Error('Variable \'' + p + '\' is not defined');
+            }
+            if (p.startsWith('🔤')) {
+                const vName = p.substring(2);
+                if (this.variables[vName] !== undefined) {
+                    return String(this.variables[vName]);
+                }
+                throw new Error('Variable \'' + p + '\' is not defined');
+            }
+            if (p.startsWith('📋')) {
+                const vName = p.substring(2);
+                if (this.variables[vName] !== undefined) {
+                    return String(this.variables[vName]);
+                }
+                throw new Error('Variable \'' + p + '\' is not defined');
+            }
+            if (p.startsWith('🔘')) {
+                const vName = p.substring(2);
+                if (this.variables[vName] !== undefined) {
+                    return String(this.variables[vName]);
+                }
+                throw new Error('Variable \'' + p + '\' is not defined');
+            }
+            if (p.startsWith('🖼️')) {
+                const vName = p.substring(3); // 🖼️ is 3 chars
+                if (this.variables[vName] !== undefined) {
+                    return String(this.variables[vName]);
+                }
+                throw new Error('Variable \'' + p + '\' is not defined');
+            }
+            if (p.startsWith('📦')) {
+                const vName = p.substring(2);
+                if (this.variables[vName] !== undefined) {
+                    return String(this.variables[vName]);
+                }
+                throw new Error('Variable \'' + p + '\' is not defined');
+            }
+            
+            if (this.variables[p] !== undefined) {
+                return String(this.variables[p]);
+            }
+            return String(this.evaluateMath(p));
+        }).join('');
+        
+        return result;
+    }
+    
+    // Math operations - only if contains math operators
+    if (expr.match(/[\+\-\*\/\%]/)) {
+        return this.evaluateMath(expr);
+    }
+    
+    // Variable without prefix
+    if (this.variables[expr] !== undefined) {
+        return this.variables[expr];
+    }
+    
+    // Number
+    const num = parseFloat(expr);
+    if (!isNaN(num)) {
+        return num;
+    }
+    
+    return expr;
+}
+
+    evaluateMath(expr) {
+        let evalExpr = expr;
+        
+        // Replace emoji-prefixed variables first
+        for (const [varName, value] of Object.entries(this.variables)) {
+            evalExpr = evalExpr.replace(new RegExp('🔢' + varName + '\\b', 'g'), value);
+            evalExpr = evalExpr.replace(new RegExp('🔤' + varName + '\\b', 'g'), value);
+            evalExpr = evalExpr.replace(new RegExp('📋' + varName + '\\b', 'g'), value);
+            evalExpr = evalExpr.replace(new RegExp('🔘' + varName + '\\b', 'g'), value);
+            evalExpr = evalExpr.replace(new RegExp('🖼️' + varName + '\\b', 'g'), value);
+            evalExpr = evalExpr.replace(new RegExp('📦' + varName + '\\b', 'g'), value);
+            evalExpr = evalExpr.replace(new RegExp('\\b' + varName + '\\b', 'g'), value);
+        }
+        
+        // Check ob noch Emoji-Variablen übrig sind (= nicht definiert!)
+        const unresolvedVars = evalExpr.match(/[🔢🔤📋🔘🖼️📦]\w+/g);
+        if (unresolvedVars) {
+            throw new Error('Undefined variable(s): ' + unresolvedVars.join(', '));
+        }
+        
+        try {
+            const result = eval(evalExpr);
+            return result;
+        } catch (e) {
+            console.error('Math eval error:', e, 'Expression:', evalExpr);
+            throw new Error('Invalid expression: ' + expr);
+        }
+    }
+}
+
+// Snippet insertion function
+function insertSnippet(type) {
+    const textarea = document.getElementById('cymple-input');
+    const snippets = {
+        'output': '💬 "Hello, World!"',
+        'input': '🔤name ← 🔤🔽 "Enter your name"\n💬 "Hello, 🔤name!"',
+        'comment': '📝 This is a comment',
+        'number': '🔢count ← 42',
+        'string': '🔤name ← "Alice"',
+        'assign': '🔢x ← 42',
+        'math': '🔢result ← 🔢a + 🔢b',
+        'compare': '❓ 🔢x == 🔢y',
+        'increment': '🔢i ← 🔢i + 1',
+        'interpolate': '💬 "Value: 🔢x"',
+        'if': '❓ 🔢x > 0\n\t💬 "Positive"',
+        'ifelse': '❓ 🔢x > 0\n\t💬 "Positive"\n⤵️\n\t💬 "Not positive"',
+        'while': '🔢i ← 1\n🔁 🔢i <= 5\n\t💬 "Count: 🔢i"\n\t🔢i ← 🔢i + 1',
+        'function': '🧵 greet(name: 🔤)\n\t💬 "Hello, 🔤name!"',
+        'funccall': '🔢result ← myFunction(arg1, arg2)',
+        'main': '🧵 main()\n\t💬 "Program starts here"',
+        'return': '↩ result'
+    };
+    
+    const snippet = snippets[type] || '';
+    
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const text = textarea.value;
+    
+    const before = text.substring(0, start);
+    const after = text.substring(end);
+    
+    const prefix = (start > 0 && before[before.length - 1] !== '\n') ? '\n' : '';
+    const suffix = '\n';
+    
+    textarea.value = before + prefix + snippet + suffix + after;
+    
+    const newPos = start + prefix.length + snippet.length + suffix.length;
+    textarea.selectionStart = newPos;
+    textarea.selectionEnd = newPos;
+    textarea.focus();
+}
+
+function clearCymple() {
+    document.getElementById('cymple-input').value = '💬 "Hello, World!"';
+    document.getElementById('cymple-output').style.display = 'none';
+    document.getElementById('cymple-result').textContent = '';
+    document.getElementById('cymple-input').focus();
+}
+
+function runCympleCode() {
+    const code = document.getElementById('cymple-input').value;
+    
+    try {
+        const interpreter = new CympleInterpreter();
+        const result = interpreter.run(code);
+        
+        document.getElementById('cymple-output').style.display = 'block';
+        document.getElementById('cymple-result').textContent = result || '(no output)';
+    } catch (error) {
+        document.getElementById('cymple-output').style.display = 'block';
+        document.getElementById('cymple-result').textContent = '❌ Error: ' + error.message;
+        console.error('Cymple Error:', error);
+    }
+}
+
+function loadExample(type) {
+    const examples = {
+        'hello': '💬 "Hello, World!"',
+        
+        'variables': `📝 Simple math (v1.4 with string interpolation)
+🔢x ← 5
+🔢y ← 10
+🔢result ← 🔢x + 🔢y
+💬 "x + y = 🔢result"`,
+        
+        'input': `📝 Interactive greeting (v1.4 style)
+🔤name ← 🔤🔽 "Enter your name"
+💬 "Hello, 🔤name!"`,
+        
+        'ifelse': `📝 Check if number is positive (v1.4)
+🔢num ← 7
+❓ 🔢num > 0
+\t💬 "Number is positive"
+⤵️
+\t💬 "Number is not positive"`,
+        
+        'loop': `📝 Count from 1 to 5 (v1.4)
+🔢i ← 1
+🔁 🔢i <= 5
+\t💬 "Count: 🔢i"
+\t🔢i ← 🔢i + 1`,
+        
+        'fibonacci': `📝 Fibonacci function (v1.4)
+🧵 fib(n: 🔢) -> 🔢
+\t❓ n <= 1
+\t\t↩ n
+\t🔢a ← fib(n - 1)
+\t🔢b ← fib(n - 2)
+\t↩ 🔢a + 🔢b
+
+🔢result ← fib(8)
+💬 "Fibonacci(8) = 🔢result"`,
+        
+        'factorial': `📝 Calculate factorial (v1.4)
+🧵 factorial(n: 🔢) -> 🔢
+\t❓ n <= 1
+\t\t↩ 1
+\t🔢prev ← factorial(n - 1)
+\t↩ n * 🔢prev
+
+🔢result ← factorial(6)
+💬 "6! = 🔢result"`,
+        
+        'countdown': `📝 Countdown from 10 (v1.4)
+🔢count ← 10
+🔁 🔢count > 0
+\t💬 "Countdown: 🔢count"
+\t🔢count ← 🔢count - 1
+💬 "Liftoff! 🚀"`,
+        
+        'fizzbuzz': `📝 FizzBuzz from 1 to 15 (v1.4)
+🔢i ← 1
+🔁 🔢i <= 15
+\t🔢div3 ← 🔢i % 3
+\t🔢div5 ← 🔢i % 5
+\t❓ 🔢div3 == 0
+\t\t❓ 🔢div5 == 0
+\t\t\t💬 "FizzBuzz"
+\t\t⤵️
+\t\t\t💬 "Fizz"
+\t⤵️
+\t\t❓ 🔢div5 == 0
+\t\t\t💬 "Buzz"
+\t\t⤵️
+\t\t\t💬 "🔢i"
+\t🔢i ← 🔢i + 1`,
+        
+        'sum': `📝 Sum of numbers from 1 to N (v1.4)
+🔢n ← 10
+🔢sum ← 0
+🔢i ← 1
+🔁 🔢i <= 🔢n
+\t🔢sum ← 🔢sum + 🔢i
+\t🔢i ← 🔢i + 1
+💬 "Sum 1 to 🔢n = 🔢sum"`,
+
+        'race_simple': `📝 Quantum Race - Simple Example (v1.5)
+📝 NOTE: This shows SYNTAX only
+📝 Interpreter doesn't execute parallel tasks
+
+💬 "=== Cymple 1.5: Race Operation ==="
+💬 " "
+💬 "Syntax:"
+💬 "🌀⚡ 🔤result ← [task1(), task2(), task3()]"
+💬 "    ⏱️ 5s    📝 SHOULD have timeout (1.5)"
+💬 "        ↩ fallback()"
+💬 "    ✅ 🔤winner"
+💬 "        💬 \\"Winner: 🔤winner\\""
+💬 "    📝 Tasks auto-cleaned up here!"
+💬 " "
+💬 "Starts 3 tasks in parallel"
+💬 "Returns first result"
+💬 "Cancels other tasks with 🛑"
+💬 " "
+💬 "NEW in 1.5:"
+💬 "• Structured concurrency"
+💬 "• Tasks guaranteed cleaned"
+💬 "• Timeouts RECOMMENDED"
+💬 " "
+💬 "Use case: Multi-region API calls"`,
+
+        'race_timeout': `📝 Race with Timeout (v1.5)
+📝 NOTE: This shows SYNTAX only
+
+💬 "=== Race + Timeout (v1.5) ==="
+💬 " "
+💬 "Syntax:"
+💬 "🌀⚡ 🔤result ← [fetch_eu(), fetch_us()]"
+💬 "    ⏱️ 3s    📝 REQUIRED for safety"
+💬 "        💬 \\"Timeout!\\""
+💬 "        ↩ cached_value()"
+💬 "    ✅ 🔤winner"
+💬 "        ↩ 🔤winner"
+💬 "    📝 Tasks auto-cancelled here"
+💬 " "
+💬 "Time units (1.4+):"
+💬 "• 3s, 500ms, 2m, 1h"
+💬 "• Variables: ⏱️ 🔢timeout"
+💬 " "
+💬 "NEW in 1.5:"
+💬 "• Timeouts STRONGLY RECOMMENDED"
+💬 "• Prevents indefinite blocking"
+💬 "• Structured cleanup guaranteed"`,
+
+        'collect_progress': `📝 Collect with Progress (v1.5)
+📝 NOTE: This shows SYNTAX only
+
+💬 "=== Collect + Progress (v1.5) ==="
+💬 " "
+💬 "Syntax:"
+💬 "🌀📦 📋results ← [task1(), task2(), ... task100()]"
+💬 "    ⏱️ 30s    📝 Timeout recommended"
+💬 "        ↩ 📋results"
+💬 "    ⏩ 📋partial every 10    📝 Efficient!"
+💬 "        💬 \\"Progress: 📋partial.length\\""
+💬 "    ✅ 📋all"
+💬 "        ↩ filter_ok(📋all)"
+💬 "    📝 Tasks auto-cleaned here"
+💬 " "
+💬 "Progress frequency (1.4+):"
+💬 "• every 10: Only 10 events"
+💬 "• Without: 100 events (slow!)"
+💬 " "
+💬 "NEW in 1.5:"
+💬 "• Structured concurrency"
+💬 "• Runtime cap (default 1000)"
+💬 "• Batch large task lists"
+💬 " "
+💬 "Use case:"
+💬 "• Batch processing"
+💬 "• Parallel downloads"`,
+
+        'collect_cancel': `📝 Early Cancellation with 🛑 (v1.5)
+📝 NOTE: This shows SYNTAX only
+
+💬 "=== Early Cancel (v1.5) ==="
+💬 " "
+💬 "Syntax:"
+💬 "🌀📦 📋results ← [search_db1(), ... search_db10()]"
+💬 "    ⏱️ 30s    📝 Timeout safety"
+💬 "        ↩ 📋results"
+💬 "    ⏩ 📋partial every 5"
+💬 "        💬 \\"Found: 📋partial.length\\""
+💬 "        ❓ 📋partial.length >= 20"
+💬 "            💬 \\"Enough results!\\""
+💬 "            🛑    📝 Stop remaining tasks"
+💬 "            ↩ 📋partial"
+💬 "    ✅ 📋all"
+💬 "        ↩ 📋all"
+💬 "    📝 Tasks auto-cleaned here"
+💬 " "
+💬 "Benefits (1.4+):"
+💬 "• Stop when you have enough"
+💬 "• Save resources"
+💬 "• 70% faster when stopping early"
+💬 " "
+💬 "NEW in 1.5:"
+💬 "• Structured cleanup guaranteed"
+💬 "• Runtime cap prevents spawn storms"`,
+
+        'multi_search': `📝 Multi-Server Search (v1.5)
+📝 Now with structured concurrency
+
+💬 "=== Multi-Server Search (v1.5) ==="
+💬 " "
+💬 "Problem:"
+💬 "• 3 search APIs (EU, US, Asia)"
+💬 "• Don't know which is fastest"
+💬 "• Need result ASAP"
+💬 " "
+💬 "Cymple 1.5 Solution:"
+💬 " "
+💬 "🧵 search_fastest(🔤query) -> 🔤"
+💬 "    🌀⚡ 🔤result ← ["
+💬 "        search_eu(🔤query),"
+💬 "        search_us(🔤query),"
+💬 "        search_asia(🔤query)"
+💬 "    ]"
+💬 "        ⏱️ 3s"
+💬 "            ↩ cached_search(🔤query)"
+💬 "        ✅ 🔤winner"
+💬 "            ↩ 🔤winner"
+💬 "    📝 Tasks auto-cancelled/cleaned here!"
+💬 " "
+💬 "NEW in 1.5:"
+💬 "• Structured concurrency"
+💬 "• Tasks guaranteed cleaned up"
+💬 "• No resource leaks"
+💬 "• 3s timeout (SHOULD have)"
+💬 " "
+💬 "vs JavaScript: 50+ lines"
+💬 "vs Go: 65+ lines"`,
+
+        'memory_safe': `📝 Safe Memory Block (v1.5)
+📝 This shows memory safety features
+
+💬 "=== Safe Memory Blocks (v1.5) ==="
+💬 " "
+💬 "NEW in 1.5: Validated Handles"
+💬 " "
+💬 "Syntax:"
+💬 "💾buffer ← allocate(100)"
+💬 " "
+💬 "🔗 buffer -> mut B"
+💬 "    B[0] ← 42     📝 OK - validated"
+💬 "    B[99] ← 99    📝 OK - within bounds"
+💬 "    B[150] ← 5    📝 ERROR: Bounds check!"
+💬 " "
+💬 "Features:"
+💬 "• Handle validation on every use"
+💬 "• Generation counter checks"
+💬 "• Bounds checking (REQUIRED)"
+💬 "• Array-like indexing"
+💬 "• No pointer arithmetic"
+💬 " "
+💬 "Benefits:"
+💬 "• No buffer overflows"
+💬 "• Safe by default"
+💬 "• Catches errors immediately"
+💬 "• No undefined behavior"`,
+
+        'handle_validation': `📝 Handle Validation (v1.5)
+📝 Use-after-free detection
+
+💬 "=== Handle Validation (v1.5) ==="
+💬 " "
+💬 "Syntax:"
+💬 "💾block ← allocate(100)"
+💬 "🔗 block -> B"
+💬 "    B[0] ← 42    📝 OK - valid handle"
+💬 " "
+💬 "release(block)   📝 Generation increments"
+💬 " "
+💬 "📋val ← block[0]  📝 ERROR: Stale handle!"
+💬 " "
+💬 "Handle Structure (internal):"
+💬 "• slot/index"
+💬 "• generation counter"
+💬 "• kind/type tag"
+💬 " "
+💬 "Validation (MUST):"
+💬 "1. Slot in range?"
+💬 "2. Slot occupied?"
+💬 "3. Generation matches?"
+💬 "4. Kind matches?"
+💬 " "
+💬 "On failure: Runtime error/panic"
+💬 " "
+💬 "Result: Use-after-free IMPOSSIBLE"`,
+
+        'drawing': `📝 Simple ASCII Art
+💬 "   /\\\\\\\\"
+💬 "  /  \\\\\\\\"
+💬 " /    \\\\\\\\"
+💬 "/______\\\\\\\\"
+💬 "|      |"
+💬 "|  []  |"
+💬 "|______|"`
+    };
+    
+    document.getElementById('cymple-input').value = examples[type] || examples['hello'];
+    document.getElementById('cymple-output').style.display = 'none';
+}
+</script>
+</body>
+</html>
+
