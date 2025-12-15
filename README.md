@@ -1,9 +1,7 @@
 # CYMPLE Programming Language
 
-- **Version 1.4** - Procedural Programming with Unicode Symbols
-- **Simple Interpreter** - Find it at the bottom of https://cymple.dev
-- **HTML** - cymple_interpreter.html in this repo does the same
- 
+**Version 1.5** - Memory Safety Through Validated Handles
+
 ---
 
 ## What is Cymple?
@@ -52,38 +50,39 @@ Cymple is a procedural programming language that uses Unicode symbols (emojis) i
 
 ---
 
-## What's New in Version 1.4
+## What's New in Version 1.5
 
-### ⏱️ **Timeouts with Units**
+### 🔥 **Pointers Removed**
 ```cymple
-🌀⚡ 🔤result ← [fetch_eu(), fetch_us()]
-    ⏱️ 3s  📝 Clear and readable!
-        💬 "Timeout"
+📝 Memory access only through validated handles
+💾block ← allocate(100)
+📋val ← block[0]  📝 Safe array-like access
 ```
 
-### ⏩ **Progress Frequency Control**
+### ✅ **Generational Handle Validation**
 ```cymple
-🌀📦 📋results ← [100 tasks...]
-    ⏩ 📋partial every 10  📝 50-90% less overhead
-        💬 "Progress: 📋partial.length%"
+💾block ← allocate(100)
+release(block)
+📋val ← block[0]  📝 ERROR: Stale handle detected!
 ```
 
-### 🛑 **Early Cancellation**
+### 🧵 **Structured Concurrency**
 ```cymple
-⏩ 📋partial
-    ❓ 📋partial.length >= 20
-        🛑  📝 Stop when you have enough!
-        ↩ 📋partial
+🌀📦 📋results ← [task1(), task2(), task3()]
+    ⏱️ 30s
+        ↩ 📋results
+    ✅ 📋all
+        ↩ 📋all
+📝 Tasks guaranteed cleaned up here
 ```
 
-### ❌ **Total Failure Detection**
+### 🚦 **Runtime Task Cap**
 ```cymple
-❌ 🔤total_failure  📝 Only fires if ALL tasks fail
-    💬 "Everything failed"
-    ↩ fallback()
+📝 Default: 1000 concurrent tasks max
+📝 Prevents spawn storms, provides backpressure
 ```
 
-[See full changelog](cymple_1_4_changelog.md)
+[See full changelog](cymple_1_5_changelog.md)
 
 ---
 
@@ -198,6 +197,64 @@ async function searchAll(query) {
 
 ---
 
+
+## Safety Guarantees
+
+Cymple 1.5 provides **strong safety guarantees** through normative requirements:
+
+### Guaranteed Impossible (MUST prevent):
+- ❌ Use-after-free
+- ❌ Buffer overflows
+- ❌ Null pointer dereferences
+- ❌ Data races
+- ❌ Undefined behavior
+
+### Guaranteed Detected (MUST catch):
+- ✅ Stale handle usage
+- ✅ Out-of-bounds access
+- ✅ Invalid handle operations
+- ✅ Type mismatches
+- ✅ Resource leaks (in structured scopes)
+
+### Enforced Limits (MUST/SHOULD):
+- MUST validate every handle operation
+- MUST check bounds on every memory access
+- MUST enforce task concurrency cap
+- SHOULD provide timeouts for blocking operations
+- MUST release resources on scope exit
+
+See the [specification](cymple_spec_1_5.md) for all 57 MUST, 8 SHOULD, and 9 MAY requirements.
+
+
+## 📜 Formal Specification
+
+**Cymple 1.5 is fully formally specified** - the first version with:
+
+✅ **Complete EBNF Grammar** (80 productions, 17 semantic notes)
+✅ **Formal Semantics** (state machines, algorithms, invariants)  
+✅ **Normative Requirements** (109 MUST, 18 SHOULD, 13 MAY)
+✅ **Error Code Standards** (12 standard error types)
+
+**What this means for you:**
+- Unambiguous behavior - no guessing
+- Multiple implementations possible
+- Testable conformance
+- Production-ready specification
+
+**Normative Sections** (MUST follow):
+- Handles, Memory Blocks, Concurrency, Channels
+- Error Handling, Formal Semantics
+- EBNF Grammar
+
+**Informative Sections** (examples):
+- Code examples, Design rationale, Footguns
+
+See the [full specification](cymple_spec_1_5.md) for details.
+
+---
+
+---
+
 ## Core Concepts
 
 ### Memory Safety Without GC
@@ -260,7 +317,7 @@ async function searchAll(query) {
 
 ---
 
-## Quantum Operations (v1.4)
+## Quantum Operations (v1.5)
 
 Cymple's killer feature for parallel programming.
 
@@ -320,8 +377,8 @@ Cymple's killer feature for parallel programming.
 
 - [**Specification**](cymple_spec_1_4.md) - Complete language reference
 - [**EBNF Grammar**](cymple_ebnf_1_4.txt) - Formal syntax definition
-- [**Changelog**](cymple_1_4_changelog.md) - What's new in 1.4
-- [**Version Comparison**](cymple_version_comparison.md) - 1.2 vs 1.3 vs 1.4
+- [**Changelog**](cymple_1_5_changelog.md) - What's new in 1.4
+- [**Version Comparison**](cymple_version_comparison.md) - 1.2 → 1.3 → 1.4 → 1.5
 
 ---
 
@@ -460,7 +517,7 @@ Cymple's killer feature for parallel programming.
 | **Memory safety** | ✅ Compile-time | ❌ Runtime | ✅ Compile-time | ⚠️ Runtime | ❌ Runtime |
 | **GC pauses** | ✅ None | ❌ Yes | ✅ None | ❌ Yes | ❌ Yes |
 
-[See detailed benchmarks in changelog](cymple_1_4_changelog.md#performance-impact)
+[See detailed benchmarks in changelog](cymple_1_5_changelog.md#performance-impact)
 
 ---
 
@@ -492,17 +549,17 @@ Cymple's killer feature for parallel programming.
 1. Read the [Quick Start](#quick-start) section above
 2. Study the [Complete Specification](cymple_spec_1_4.md)
 3. Review [Example Code](#examples)
-4. Check the [Changelog](cymple_1_4_changelog.md) for latest features
+4. Check the [Changelog](cymple_1_5_changelog.md) for latest features
 
 ---
 
 ## Project Status
 
-**Version:** 1.4 (December 4, 2025)
+**Version:** 1.5 (December 15, 2025)
 **Status:** Language specification complete, compiler in development
 
 ### Completed
-✅ Language specification v1.4
+✅ Language specification v1.5
 ✅ EBNF grammar
 ✅ Core features defined
 ✅ Quantum operations enhanced
@@ -577,6 +634,6 @@ Cymple draws inspiration from:
 
 ---
 
-**Cymple 1.4** - Making parallel programming simple again.
+**Cymple 1.5** - Memory safety through validated handles.
 
 *© 2025 Jörg Burbach*
